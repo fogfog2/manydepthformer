@@ -28,6 +28,7 @@ from .layers import SSIM, BackprojectDepth, Project3D, transformation_from_param
 from manydepth import datasets, networks
 import matplotlib.pyplot as plt
 
+from collections import OrderedDict
 
 _DEPTH_COLORMAP = plt.get_cmap('plasma', 256)  # for plotting
 
@@ -76,8 +77,8 @@ class Trainer:
         # MODEL SETUP
 
         #encoder_model = "resnet" 
-        #encoder_model = "swin_h" 
-        encoder_model = "cmt_h"
+        encoder_model = "swin_h" 
+        #encoder_model = "cmt_h"
 
         if "resnet" in encoder_model:            
             self.models["encoder"] = networks.ResnetEncoderMatching(
@@ -143,8 +144,12 @@ class Trainer:
         self.model_lr_scheduler = optim.lr_scheduler.StepLR(
             self.model_optimizer, self.opt.scheduler_step_size, 0.1)
 
-        if self.opt.load_weights_folder is not None:
-            self.load_model()
+
+        if "swin_h" in encoder_model:
+           self.load_model_with_swin()
+        
+        if self.opt.load_weights_folder is not None:            
+                self.load_model()
 
         if self.opt.mono_weights_folder is not None:
             self.load_mono_model()
@@ -868,6 +873,41 @@ class Trainer:
         else:
             print("Cannot find Adam weights so Adam is randomly initialized")
 
+    def load_model_with_swin(self):
+        model_dict = self.models['encoder'].state_dict()        
+        pretrained_dict = torch.load("/home/sj/src/pretrained/swin_tiny_patch4_window7_224.pth")['model']
+
+        updated_state_dict = OrderedDict()
+        for key, val in pretrained_dict.items():
+            swin_key = 'swin.'+key
+            if swin_key in model_dict.keys():
+                 if same_shape(val.shape, model_dict[swin_key].shape):
+                    updated_state_dict[swin_key] = val
+
+        self.models['encoder'].load_state_dict(updated_state_dict,strict=False)
+
+def same_shape(shape1, shape2):
+    """
+    Checks if two shapes are the same
+
+    Parameters
+    ----------
+    shape1 : tuple
+        First shape
+    shape2 : tuple
+        Second shape
+
+    Returns
+    -------
+    flag : bool
+        True if both shapes are the same (same length and dimensions)
+    """
+    if len(shape1) != len(shape2):
+        return False
+    for i in range(len(shape1)):
+        if shape1[i] != shape2[i]:
+            return False
+    return True
 
 def colormap(inputs, normalize=True, torch_transpose=True):
     if isinstance(inputs, torch.Tensor):
