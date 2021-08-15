@@ -74,15 +74,39 @@ class Trainer:
         print('Loading frames: {}'.format(frames_to_load))
 
         # MODEL SETUP
-        self.models["encoder"] = networks.ResnetEncoderMatching(
-            self.opt.num_layers, self.opt.weights_init == "pretrained",
-            input_height=self.opt.height, input_width=self.opt.width,
-            adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
-            depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
+
+        #encoder_model = "resnet" 
+        #encoder_model = "swin_h" 
+        encoder_model = "cmt_h"
+
+        if "resnet" in encoder_model:            
+            self.models["encoder"] = networks.ResnetEncoderMatching(
+                self.opt.num_layers, self.opt.weights_init == "pretrained",
+                input_height=self.opt.height, input_width=self.opt.width,
+                adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
+                depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
+
+        elif "swin_h" in encoder_model:
+            self.models["encoder"] = networks.SwinEncoderMatching(
+                self.opt.num_layers, self.opt.weights_init == "pretrained",
+                input_height=self.opt.height, input_width=self.opt.width,
+                adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
+                depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
+
+        elif "cmt_h" in encoder_model:
+            self.models["encoder"] = networks.CMTEncoderMatching(
+                self.opt.num_layers, self.opt.weights_init == "pretrained",
+                input_height=self.opt.height, input_width=self.opt.width,
+                adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
+                depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
+
+
         self.models["encoder"].to(self.device)
 
         self.models["depth"] = networks.DepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
+
+
         self.models["depth"].to(self.device)
 
         self.parameters_to_train += list(self.models["encoder"].parameters())

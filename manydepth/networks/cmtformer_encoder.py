@@ -18,6 +18,7 @@ import torchvision.models as models
 import torch.utils.model_zoo as model_zoo
 from manydepth.layers import BackprojectDepth, Project3D
 
+from manydepth.networks.cmt_origin_cascade_h import CMT_Ti
 
 class ResNetMultiImageInput(models.ResNet):
     """Constructs a resnet model with varying number of input images.
@@ -65,7 +66,20 @@ def resnet_multiimage_input(num_layers, pretrained=False, num_input_images=1):
     return model
 
 
-class ResnetEncoderMatching(nn.Module):
+class fcconv(nn.Module):
+    def __init__(self,  in_channel, out_channel):
+        super().__init__()
+        self.conv =  nn.Conv2d(in_channel, out_channel, kernel_size=1)
+        self.nonlin = nn.ELU(inplace=True)
+        self.bn1 = nn.BatchNorm2d(out_channel)
+
+    def forward(self, x):
+        out = self.conv(x)
+        out = self.nonlin(self.bn1(out))
+        ##norm?
+        return out
+
+class CMTEncoderMatching(nn.Module):
     """Resnet encoder adapted to include a cost volume after the 2nd block.
 
     Setting adaptive_bins=True will recompute the depth bins used for matching upon each
@@ -76,13 +90,13 @@ class ResnetEncoderMatching(nn.Module):
                  min_depth_bin=0.1, max_depth_bin=20.0, num_depth_bins=96,
                  adaptive_bins=False, depth_binning='linear'):
 
-        super(ResnetEncoderMatching, self).__init__()
+        super(CMTEncoderMatching, self).__init__()
 
         self.adaptive_bins = adaptive_bins
         self.depth_binning = depth_binning
         self.set_missing_to_max = True
 
-        self.num_ch_enc = np.array([64, 64, 128, 256, 512])
+        
         self.num_depth_bins = num_depth_bins
         # we build the cost volume at 1/4 resolution
         self.matching_height, self.matching_width = input_height // 4, input_width // 4
@@ -103,9 +117,17 @@ class ResnetEncoderMatching(nn.Module):
         encoder = resnets[num_layers](pretrained)
         self.layer0 = nn.Sequential(encoder.conv1,  encoder.bn1, encoder.relu)
         self.layer1 = nn.Sequential(encoder.maxpool,  encoder.layer1)
+
+
         self.layer2 = encoder.layer2
         self.layer3 = encoder.layer3
         self.layer4 = encoder.layer4
+
+        self.stem_channel = 64
+        self.embed_dim= 46    
+        self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+        self.cmt = CMT_Ti(in_channels = 3, input_size = 256, embed_dim= self.embed_dim, stem_channels= self.stem_channel)
+        self.upconv = fcconv(64,46)
 
         if num_layers > 34:
             self.num_ch_enc[1:] *= 4
@@ -300,9 +322,14 @@ class ResnetEncoderMatching(nn.Module):
         cost_volume *= confidence_mask.unsqueeze(1)
         post_matching_feats = self.reduce_conv(torch.cat([self.features[-1], cost_volume], 1))
 
-        self.features.append(self.layer2(post_matching_feats))
-        self.features.append(self.layer3(self.features[-1]))
-        self.features.append(self.layer4(self.features[-1]))
+
+        out = self.upconv(post_matching_feats)
+        out = self.cmt(out)
+        self.features = self.features + out
+
+        # self.features.append(self.layer2(post_matching_feats))
+        # self.features.append(self.layer3(self.features[-1]))
+        # self.features.append(self.layer4(self.features[-1]))
 
         return self.features, lowest_cost, confidence_mask
 
