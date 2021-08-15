@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "env": {"PYTHONPATH": "${cwd}" },
+            
+            "program": "${workspaceFolder}/manydepth/train.py",
+            "args": ["--data_path=/home/sj/kitti",
+                "--log_dir=/home/sj/src/manydepth/result",
+                "--batch_size=4",
+                "--png"]
+        }
+    ]
+}
