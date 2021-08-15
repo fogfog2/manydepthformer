@@ -14,10 +14,10 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from .utils import readlines
-from .options import MonodepthOptions
+from manydepth.utils import readlines
+from manydepth.options import MonodepthOptions
 from manydepth import datasets, networks
-from .layers import transformation_from_parameters, disp_to_depth
+from manydepth.layers import transformation_from_parameters, disp_to_depth
 import tqdm
 
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
@@ -109,17 +109,22 @@ def evaluate(opt):
                   'using command line values!')
             HEIGHT, WIDTH = opt.height, opt.width
 
+        img_ext = '.png' if opt.png else '.jpg'
         if opt.eval_split == 'cityscapes':
             dataset = datasets.CityscapesEvalDataset(opt.data_path, filenames,
                                                      HEIGHT, WIDTH,
                                                      frames_to_load, 4,
-                                                     is_train=False)
+                                                     is_train=False,
+                                                     img_ext=img_ext)
 
         else:
             dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                                encoder_dict['height'], encoder_dict['width'],
                                                frames_to_load, 4,
-                                               is_train=False)
+                                               is_train=False,
+                                               img_ext=img_ext)
+
+        
         dataloader = DataLoader(dataset, opt.batch_size, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
