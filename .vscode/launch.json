@@ -11,11 +11,18 @@
             "cwd": "${workspaceFolder}",
             "env": {"PYTHONPATH": "${cwd}" },
             
-            "program": "${workspaceFolder}/manydepth/train.py",
+            // "program": "${workspaceFolder}/manydepth/train.py",
+            // "args": ["--data_path=/home/sj/kitti",
+            //     "--log_dir=/home/sj/src/manydepth/result",
+            //     "--batch_size=4",
+            //     "--png"]
+
+            "program": "${workspaceFolder}/manydepth/evaluate_depth.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/src/manydepth/result",
-                "--batch_size=4",
+                "--load_weights_folder=/home/sj/src/manydepth/result/mdp/models/weights_19",
+                "--eval_mono",
                 "--png"]
+                
         }
     ]
 }
