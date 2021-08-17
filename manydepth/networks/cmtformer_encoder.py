@@ -18,7 +18,7 @@ import torchvision.models as models
 import torch.utils.model_zoo as model_zoo
 from manydepth.layers import BackprojectDepth, Project3D
 
-from manydepth.networks.cmt_origin_cascade_h import CMT_Ti
+from manydepth.networks.cmt_origin_cascade_h import CMT_Ti, CMT_XS, CMT_XS2, CMT_B
 
 class ResNetMultiImageInput(models.ResNet):
     """Constructs a resnet model with varying number of input images.

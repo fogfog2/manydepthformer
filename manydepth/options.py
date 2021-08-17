@@ -106,7 +106,7 @@ class MonodepthOptions:
         self.parser.add_argument("--scheduler_step_size",
                                  type=int,
                                  help="step size of the scheduler",
-                                 default=15)
+                                 default=5)
         self.parser.add_argument("--freeze_teacher_and_pose",
                                  action="store_true",
                                  help="If set, freeze the weights of the single frame teacher"

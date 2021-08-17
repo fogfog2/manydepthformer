@@ -16,7 +16,7 @@ Date: 2021/07/14
 
 import torch as t
 from torch.nn import functional as F
-from packnet_sfm.networks.depth.modules import Stem, PatchAggregation, CMTBlock
+from manydepth.networks.cmtmodules import Stem, PatchAggregation, CMTBlock
 
 
 #########################
