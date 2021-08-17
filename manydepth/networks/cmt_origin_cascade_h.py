@@ -16,7 +16,7 @@ Date: 2021/07/14
 
 import torch as t
 from torch.nn import functional as F
-from manydepth.networks.cmtmodules import Stem, PatchAggregation, CMTBlock
+from packnet_sfm.networks.depth.modules import Stem, PatchAggregation, CMTBlock
 
 
 #########################
@@ -68,27 +68,27 @@ class CMT(t.nn.Module):
 
 
         # 1. Stem
-        self.stem = Stem(in_channels = in_channels, out_channels = stem_channels, stride = 2)
+        #self.stem = Stem(in_channels = in_channels, out_channels = stem_channels, stride = 2)
 
         # 2. Patch Aggregation 1
         #self.pa1 = PatchAggregation(in_channels = stem_channels, out_channels = pa_channelses[0], kernel_size=3, stride = 1, padding = 1)
-        self.pa1 = PatchAggregation(in_channels = stem_channels, out_channels = pa_channelses[0], kernel_size=2, stride = 2, padding = 0)
+        #self.pa1 = PatchAggregation(in_channels = stem_channels, out_channels = pa_channelses[0], kernel_size=2, stride = 2, padding = 0)
         self.pa2 = PatchAggregation(in_channels = cmt_channelses[0], out_channels = pa_channelses[1])
         self.pa3 = PatchAggregation(in_channels = cmt_channelses[1], out_channels = pa_channelses[2])
         self.pa4 = PatchAggregation(in_channels = cmt_channelses[2], out_channels = pa_channelses[3])
 
         # 3. CMT block
-        cmt1 = []
-        for _ in range(repeats[0]):
-            cmt_layer = CMTBlock(input_width = widths[0],
-                                 input_height = heights[0],
-                                 kernel_size = 8,
-                                 d_k = cmt_channelses[0],
-                                 d_v = cmt_channelses[0],
-                                 num_heads = 1,
-                                 R = R, in_channels = pa_channelses[0])
-            cmt1.append(cmt_layer)
-        self.cmt1 = t.nn.Sequential(*cmt1)
+        # cmt1 = []
+        # for _ in range(repeats[0]):
+        #     cmt_layer = CMTBlock(input_width = widths[0],
+        #                          input_height = heights[0],
+        #                          kernel_size = 8,
+        #                          d_k = cmt_channelses[0],
+        #                          d_v = cmt_channelses[0],
+        #                          num_heads = 1,
+        #                          R = R, in_channels = pa_channelses[0])
+        #     cmt1.append(cmt_layer)
+        # self.cmt1 = t.nn.Sequential(*cmt1)
 
         cmt2 = []
         for _ in range(repeats[1]):
@@ -127,7 +127,7 @@ class CMT(t.nn.Module):
         self.cmt4 = t.nn.Sequential(*cmt4)
 
         # 4. Global Avg Pool
-        self.avg = t.nn.AdaptiveAvgPool2d(1)
+        #self.avg = t.nn.AdaptiveAvgPool2d(1)
         
         numl_layer = len(cmt_channelses)
         num_features = [int(cmt_channelses[0] * 2 ** i) for i in range(numl_layer)]
@@ -219,7 +219,7 @@ class CMT(t.nn.Module):
 class CMT_Ti(t.nn.Module):
     """Define CMT-Ti model"""
 
-    def __init__(self, in_channels = 3, input_size = 224, embed_dim = 46, stem_channels = 16):
+    def __init__(self, in_channels = 3, input_size = 224, embed_dim = 46):
         """
         Args :
             --in_channels: default is 3
@@ -261,7 +261,7 @@ class CMT_XS(t.nn.Module):
                           cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           R = 3.8,
-                          repeats = [3, 3, 12, 3],
+                          repeats = [3, 3, 3, 3],
                           input_size = input_size)
 
     def forward(self, x):
@@ -269,7 +269,32 @@ class CMT_XS(t.nn.Module):
         x = self.cmt_xs(x)
 
         return x
+# 2. CMT-XS
+class CMT_XS2(t.nn.Module):
+    """Define CMT-XS model"""
 
+    def __init__(self, in_channels = 3, input_size = 224,embed_dim = 52):
+        """
+        Args :
+            --in_channels: default is 3
+            --input_size: default is 224
+            --num_classes: default is 1000 for ImageNet
+        """
+        super(CMT_XS2, self).__init__()
+
+        self.cmt_xs = CMT(in_channels = in_channels,
+                          stem_channels = 16,
+                          cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
+                          pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
+                          R = 3.8,
+                          repeats = [4, 4, 4, 4],
+                          input_size = input_size)
+
+    def forward(self, x):
+
+        x = self.cmt_xs(x)
+
+        return x
 
 # 3. CMT-S
 class CMT_S(t.nn.Module):
@@ -317,7 +342,7 @@ class CMT_B(t.nn.Module):
                          cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                          pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                          R = 4.,
-                         repeats = [4, 4, 20, 4],
+                         repeats = [2, 2, 2, 2],
                          input_size = input_size)
 
     def forward(self, x):
