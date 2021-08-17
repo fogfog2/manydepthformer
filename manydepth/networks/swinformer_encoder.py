@@ -88,7 +88,7 @@ class SwinEncoderMatching(nn.Module):
 
     def __init__(self, num_layers, pretrained, input_height, input_width,
                  min_depth_bin=0.1, max_depth_bin=20.0, num_depth_bins=96,
-                 adaptive_bins=False, depth_binning='linear'):
+                 adaptive_bins=False, depth_binning='linear', drop_path_rate = 0.2):
 
         super(SwinEncoderMatching, self).__init__()
 
@@ -128,7 +128,7 @@ class SwinEncoderMatching(nn.Module):
         self.swin = SwinTransformer(embed_dim=self.embed_dim,
                                     depths= [ 2, 2, 2, 2  ],
                                     num_heads=[ 3, 6, 12, 24],
-                                    drop_path_rate=0.2,
+                                    drop_path_rate=drop_path_rate,
                                     ape = False,
                                     init_dim = self.embed_dim,
                                     out_indices=(0, 1, 2, 3),
@@ -331,7 +331,7 @@ class SwinEncoderMatching(nn.Module):
         out = self.upconv(post_matching_feats)
         out = self.swin(out)
         self.features = self.features + out
-        
+
         # self.features.append(self.layer2(post_matching_feats))
         # self.features.append(self.layer3(self.features[-1]))
         # self.features.append(self.layer4(self.features[-1]))
