@@ -13,10 +13,9 @@
             
             "program": "${workspaceFolder}/manydepth/train.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/src/manydepth/result_r50cmtti",
+                "--log_dir=/home/sj/src/manydepth/result_r18cmtti",
                 "--batch_size=4",
-                "--png",
-                "--num_layers=50"]
+                "--png"]
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth.py",
             // "args": ["--data_path=/home/sj/kitti",
