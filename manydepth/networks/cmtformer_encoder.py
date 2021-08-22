@@ -128,24 +128,30 @@ class CMTEncoderMatching(nn.Module):
         # self.embed_dim= 46    
         # self.cmt = CMT_Ti(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
 
-        self.stem_channel = 64
-        self.embed_dim= 52    
-        self.cmt = CMT_XS(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
+        # self.stem_channel = 64
+        # self.embed_dim= 52    
+        # self.cmt = CMT_XS(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
 
         # self.stem_channel = 64
         # self.embed_dim= 52    
         # self.cmt = CMT_XS2(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
 
-        # self.stem_channel = 64
-        # self.embed_dim= 76    
-        # self.cmt = CMT_B(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
+        self.stem_channel = 64
+        self.embed_dim= 76    
+        self.cmt = CMT_B(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
     
-        self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
-        self.upconv = fcconv(64,self.embed_dim)
+        
+        
+        #if num_layers > 34:
+        #    self.num_ch_enc[1:] *= 4
 
         if num_layers > 34:
-            self.num_ch_enc[1:] *= 4
+            self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+            
+        else:         
+            self.num_ch_enc = np.array([64, 54, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
 
+        self.upconv = fcconv(self.num_ch_enc[1],self.embed_dim)
         self.backprojector = BackprojectDepth(batch_size=self.num_depth_bins,
                                               height=self.matching_height,
                                               width=self.matching_width)
