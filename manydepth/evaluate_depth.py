@@ -101,8 +101,8 @@ def evaluate(opt):
             decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
 
             #encoder_model = "resnet" 
-            encoder_model = "swin_h" 
-            #encoder_model = "cmt_h"
+            #encoder_model = "swin_h" 
+            encoder_model = "cmt_h"
             
             if "resnet" in encoder_model:            
                 encoder_class = networks.ResnetEncoderMatching
@@ -152,8 +152,7 @@ def evaluate(opt):
                                 adaptive_bins=True,
                                 min_depth_bin=0.1, max_depth_bin=20.0,
                                 depth_binning=opt.depth_binning,
-                                num_depth_bins=opt.num_depth_bins,
-                                drop_path_rate=0)
+                                num_depth_bins=opt.num_depth_bins)
             pose_enc_dict = torch.load(os.path.join(opt.load_weights_folder, "pose_encoder.pth"))
             pose_dec_dict = torch.load(os.path.join(opt.load_weights_folder, "pose.pth"))
 

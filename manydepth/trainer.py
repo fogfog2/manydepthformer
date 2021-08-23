@@ -114,7 +114,7 @@ class Trainer:
         self.parameters_to_train += list(self.models["depth"].parameters())
 
         self.models["mono_encoder"] = \
-            networks.ResnetEncoder(18, self.opt.weights_init == "pretrained")
+            networks.ResnetEncoder(50, self.opt.weights_init == "pretrained")
         self.models["mono_encoder"].to(self.device)
 
         self.models["mono_depth"] = \
@@ -245,7 +245,7 @@ class Trainer:
                 self.parameters_to_train = []
                 self.parameters_to_train += list(self.models["encoder"].parameters())
                 self.parameters_to_train += list(self.models["depth"].parameters())
-                self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
+                self.model_optimizer = optim.AdamW(self.parameters_to_train, self.opt.learning_rate)
                 self.model_lr_scheduler = optim.lr_scheduler.StepLR(
                     self.model_optimizer, self.opt.scheduler_step_size, 0.1)
 
