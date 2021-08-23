@@ -22,7 +22,14 @@
             //     "--load_weights_folder=/home/sj/src/manydepth/result_r18cmtti/mdp/models/weights_19",
             //     "--eval_mono",
             //     "--png"]
-                
+
+            // "program": "${workspaceFolder}/manydepth/test_simple.py",
+            // "args": ["--target_image_path=assets/0000000142.png",
+            //     "--source_image_path=assets/0000000143.png",
+            //     "--intrinsics_json_path=assets/test_sequence_intrinsics.json",
+            //     "--model_path=/home/sj/test/r18cmtxs2/weights_18"]
+
+            //"program": "${workspaceFolder}/manydepth/flops.py"
         }
     ]
 }
