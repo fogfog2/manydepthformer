@@ -229,7 +229,7 @@ class CMT_Ti(t.nn.Module):
         super(CMT_Ti, self).__init__()
 
         self.cmt_ti = CMT(in_channels = in_channels,
-                          stem_channels = stem_channels,
+                          stem_channels = 16,
                           cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           R = 3.6,

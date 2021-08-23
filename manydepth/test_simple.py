@@ -16,7 +16,7 @@ import torch
 from torchvision import transforms
 
 from manydepth import networks
-from .layers import transformation_from_parameters
+from manydepth.layers import transformation_from_parameters
 
 
 def parse_args():
@@ -79,7 +79,30 @@ def test_simple(args):
     # Loading pretrained model
     print("   Loading pretrained encoder")
     encoder_dict = torch.load(os.path.join(args.model_path, "encoder.pth"), map_location=device)
-    encoder = networks.ResnetEncoderMatching(18, False,
+
+    #encoder_model = "resnet" 
+    #encoder_model = "swin_h" 
+    encoder_model = "cmt_h"
+    if encoder_model in "resnet":
+        encoder = networks.ResnetEncoderMatching(18, False,
+                                             input_width=encoder_dict['width'],
+                                             input_height=encoder_dict['height'],
+                                             adaptive_bins=True,
+                                             min_depth_bin=encoder_dict['min_depth_bin'],
+                                             max_depth_bin=encoder_dict['max_depth_bin'],
+                                             depth_binning='linear',
+                                             num_depth_bins=96)
+    elif encoder_model in "swin_h":
+        encoder = networks.SwinEncoderMatching(18, False,
+                                             input_width=encoder_dict['width'],
+                                             input_height=encoder_dict['height'],
+                                             adaptive_bins=True,
+                                             min_depth_bin=encoder_dict['min_depth_bin'],
+                                             max_depth_bin=encoder_dict['max_depth_bin'],
+                                             depth_binning='linear',
+                                             num_depth_bins=96)
+    elif encoder_model in "cmt_h":
+        encoder = networks.CMTEncoderMatching(18, False,
                                              input_width=encoder_dict['width'],
                                              input_height=encoder_dict['height'],
                                              adaptive_bins=True,

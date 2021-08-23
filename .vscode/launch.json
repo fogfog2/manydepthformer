@@ -11,19 +11,27 @@
             "cwd": "${workspaceFolder}",
             "env": {"PYTHONPATH": "${cwd}" },
             
-            "program": "${workspaceFolder}/manydepth/train.py",
-            "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/src/manydepth/result_r50cmtb",
-                "--batch_size=4",
-                "--png",
-                "--num_layers=50"]
+            // "program": "${workspaceFolder}/manydepth/train.py",
+            // "args": ["--data_path=/home/sj/kitti",
+            //     "--log_dir=/home/sj/src/manydepth/result_r50cmtb",
+            //     "--batch_size=4",
+            //     "--png",
+            //     "--num_layers=50"]
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth.py",
             // "args": ["--data_path=/home/sj/kitti",
-            //     "--load_weights_folder=/home/sj/src/manydepth/result_cmtb/mdp/models/weights_19",
+            //     //"--load_weights_folder=/home/sj/src/manydepth/result_cmtb/mdp/models/weights_19",
+            //     "--load_weights_folder=/home/sj/test/r18cmtti/weights_28",
             //     "--eval_mono",
             //     "--png"]
-                
+
+            "program": "${workspaceFolder}/manydepth/test_simple.py",
+            "args": ["--target_image_path=assets/0000000142.png",
+                "--source_image_path=assets/0000000143.png",
+                "--intrinsics_json_path=assets/test_sequence_intrinsics.json",
+                "--model_path=/home/sj/test/r18cmtxs2/weights_18"]
+
+            //"program": "${workspaceFolder}/manydepth/flops.py"
         }
     ]
 }
