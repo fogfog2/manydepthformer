@@ -132,9 +132,9 @@ class CMTEncoderMatching(nn.Module):
         # self.embed_dim= 52    
         # self.cmt = CMT_XS(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
 
-        self.stem_channel = 64
-        self.embed_dim= 52    
-        self.cmt = CMT_XS2(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
+        # self.stem_channel = 64
+        # self.embed_dim= 52    
+        # self.cmt = CMT_XS2(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
 
         # self.stem_channel = 64
         # self.embed_dim= 76    
