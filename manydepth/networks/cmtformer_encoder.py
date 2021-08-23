@@ -124,9 +124,9 @@ class CMTEncoderMatching(nn.Module):
         self.layer4 = encoder.layer4
         
 
-        # self.stem_channel = 64
-        # self.embed_dim= 46    
-        # self.cmt = CMT_Ti(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
+        self.stem_channel = 64
+        self.embed_dim= 46    
+        self.cmt = CMT_Ti(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
 
         # self.stem_channel = 64
         # self.embed_dim= 52    

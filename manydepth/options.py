@@ -98,11 +98,11 @@ class MonodepthOptions:
         self.parser.add_argument("--learning_rate",
                                  type=float,
                                  help="learning rate",
-                                 default=1e-4)
+                                 default=6e-5)
         self.parser.add_argument("--num_epochs",
                                  type=int,
                                  help="number of epochs",
-                                 default=20)
+                                 default=40)
         self.parser.add_argument("--scheduler_step_size",
                                  type=int,
                                  help="step size of the scheduler",
@@ -113,7 +113,7 @@ class MonodepthOptions:
                                       " network and pose network.")
         self.parser.add_argument("--freeze_teacher_epoch",
                                  type=int,
-                                 default=15,
+                                 default=25,
                                  help="Sets the epoch number at which to freeze the teacher"
                                       "network and the pose network.")
 
