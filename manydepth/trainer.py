@@ -114,7 +114,7 @@ class Trainer:
         self.parameters_to_train += list(self.models["depth"].parameters())
 
         self.models["mono_encoder"] = \
-            networks.ResnetEncoder(50, self.opt.weights_init == "pretrained")
+            networks.ResnetEncoderCMT(18, self.opt.weights_init == "pretrained")
         self.models["mono_encoder"].to(self.device)
 
         self.models["mono_depth"] = \

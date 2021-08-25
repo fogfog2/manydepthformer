@@ -73,7 +73,7 @@ class CMT(t.nn.Module):
         # 2. Patch Aggregation 1
         #self.pa1 = PatchAggregation(in_channels = stem_channels, out_channels = pa_channelses[0], kernel_size=3, stride = 1, padding = 1)
         #self.pa1 = PatchAggregation(in_channels = stem_channels, out_channels = pa_channelses[0], kernel_size=2, stride = 2, padding = 0)
-        self.pa2 = PatchAggregation(in_channels = cmt_channelses[0], out_channels = pa_channelses[1])
+        self.pa2 = PatchAggregation(in_channels = 64, out_channels = pa_channelses[1])
         self.pa3 = PatchAggregation(in_channels = cmt_channelses[1], out_channels = pa_channelses[2])
         self.pa4 = PatchAggregation(in_channels = cmt_channelses[2], out_channels = pa_channelses[3])
 
