@@ -378,14 +378,14 @@ class CMTEncoderMatching(nn.Module):
             raise NotImplementedError
 
 
-class ResnetEncoder(nn.Module):
+class ResnetEncoderCMT(nn.Module):
     """Pytorch module for a resnet encoder
     """
 
     def __init__(self, num_layers, pretrained, num_input_images=1, **kwargs):
-        super(ResnetEncoder, self).__init__()
+        super(ResnetEncoderCMT, self).__init__()
 
-        self.num_ch_enc = np.array([64, 64, 128, 256, 512])
+#        self.num_ch_enc = np.array([64, 64, 128, 256, 512])
 
         resnets = {18: models.resnet18,
                    34: models.resnet34,
@@ -400,9 +400,19 @@ class ResnetEncoder(nn.Module):
             self.encoder = resnet_multiimage_input(num_layers, pretrained, num_input_images)
         else:
             self.encoder = resnets[num_layers](pretrained)
+        
+        self.stem_channel = 64
+        self.embed_dim= 46    
+        self.cmt = CMT_Ti(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
 
         if num_layers > 34:
-            self.num_ch_enc[1:] *= 4
+            self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+            
+        else:         
+            self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+
+        #if num_layers > 34:
+        #    self.num_ch_enc[1:] *= 4
 
     def forward(self, input_image):
         self.features = []
@@ -411,8 +421,12 @@ class ResnetEncoder(nn.Module):
         x = self.encoder.bn1(x)
         self.features.append(self.encoder.relu(x))
         self.features.append(self.encoder.layer1(self.encoder.maxpool(self.features[-1])))
-        self.features.append(self.encoder.layer2(self.features[-1]))
-        self.features.append(self.encoder.layer3(self.features[-1]))
-        self.features.append(self.encoder.layer4(self.features[-1]))
+
+        out = self.cmt(self.features[-1])
+        self.features = self.features + out
+
+        # self.features.append(self.encoder.layer2(self.features[-1]))
+        # self.features.append(self.encoder.layer3(self.features[-1]))
+        # self.features.append(self.encoder.layer4(self.features[-1]))
 
         return self.features
