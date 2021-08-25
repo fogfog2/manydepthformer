@@ -11,11 +11,11 @@
             "cwd": "${workspaceFolder}",
             "env": {"PYTHONPATH": "${cwd}" },
             
-            // "program": "${workspaceFolder}/manydepth/train.py",
-            // "args": ["--data_path=/home/sj/kitti",
-            //     "--log_dir=/home/sj/src/manydepth/result_r18_cmtti_mono50",
-            //     "--batch_size=4",
-            //     "--png"]
+            "program": "${workspaceFolder}/manydepth/train.py",
+            "args": ["--data_path=/home/sj/kitti",
+                "--log_dir=/home/sj/src/manydepth/result_r18_cmtti_mono101_upconv",
+                "--batch_size=4",
+                "--png"]
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth.py",
             // "args": ["--data_path=/home/sj/kitti",
