@@ -76,9 +76,9 @@ class Trainer:
 
         # MODEL SETUP
 
-        #encoder_model = "resnet" 
+        encoder_model = "resnet" 
         #encoder_model = "swin_h" 
-        encoder_model = "cmt_h"
+        #encoder_model = "cmt_h"
 
         if "resnet" in encoder_model:            
             self.models["encoder"] = networks.ResnetEncoderMatching(
@@ -114,7 +114,7 @@ class Trainer:
         self.parameters_to_train += list(self.models["depth"].parameters())
 
         self.models["mono_encoder"] = \
-            networks.ResnetEncoder(101, self.opt.weights_init == "pretrained")
+            networks.ResnetEncoder(50, self.opt.weights_init == "pretrained")
         self.models["mono_encoder"].to(self.device)
 
         self.models["mono_depth"] = \

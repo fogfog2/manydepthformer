@@ -149,7 +149,8 @@ class CMTEncoderMatching(nn.Module):
             self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
             
         else:         
-            self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+            #self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+            self.num_ch_enc = np.array([64, 64, 128, self.embed_dim*4, self.embed_dim*8])
 
         self.upconv = fcconv(self.num_ch_enc[1],self.embed_dim)
         self.backprojector = BackprojectDepth(batch_size=self.num_depth_bins,
@@ -344,10 +345,12 @@ class CMTEncoderMatching(nn.Module):
 
 
         #out = self.upconv(post_matching_feats)
-        out = self.cmt(post_matching_feats)
+
+        self.features.append(self.layer2(post_matching_feats))
+        out = self.cmt(self.features[-1])
         self.features = self.features + out
 
-        # self.features.append(self.layer2(post_matching_feats))
+        # 
         # self.features.append(self.layer3(self.features[-1]))
         # self.features.append(self.layer4(self.features[-1]))
 
