@@ -13,13 +13,13 @@
             
             "program": "${workspaceFolder}/manydepth/train.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/src/manydepth/result_resnet_mono50",
+                "--log_dir=/home/sj/src/manydepth/colon",
                 "--batch_size=4",
                 "--png"]
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth.py",
             // "args": ["--data_path=/home/sj/kitti",
-            //     "--load_weights_folder=/home/sj/src/manydepth/result_r18_cmtti_mono50_upconv_r012/mdp/models/weights_16",
+            //     "--load_weights_folder=/home/sj/src/manydepth/result_r18_cmtti_mono50_noupconv/mdp/models/weights_19",
             //     "--eval_mono",
             //     "--png"]
 
