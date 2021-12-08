@@ -60,6 +60,8 @@ class CMT(t.nn.Module):
         #     raise Exception('No other input sizes!')
         input_width = 640
         input_height = 192
+        # input_width = 640
+        # input_height = 192        
 
 
         widths = [int(input_width/4), int(input_width/8), int(input_width/16), int(input_width/32)]
@@ -74,7 +76,7 @@ class CMT(t.nn.Module):
         #self.pa1 = PatchAggregation(in_channels = stem_channels, out_channels = pa_channelses[0], kernel_size=3, stride = 1, padding = 1)
         #self.pa1 = PatchAggregation(in_channels = stem_channels, out_channels = pa_channelses[0], kernel_size=2, stride = 2, padding = 0)
         #self.pa2 = PatchAggregation(in_channels = cmt_channelses[0], out_channels = pa_channelses[1])
-        self.pa2 = PatchAggregation(in_channels = 64, out_channels = pa_channelses[1])
+        self.pa2 = PatchAggregation(in_channels = 46, out_channels = pa_channelses[1])
         self.pa3 = PatchAggregation(in_channels = cmt_channelses[1], out_channels = pa_channelses[2])
         self.pa4 = PatchAggregation(in_channels = cmt_channelses[2], out_channels = pa_channelses[3])
 

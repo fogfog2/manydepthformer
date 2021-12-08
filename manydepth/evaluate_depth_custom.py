@@ -10,11 +10,12 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1"  # noqa F402
 os.environ["OMP_NUM_THREADS"] = "1"  # noqa F402
 import cv2
 import numpy as np
+
 import torch
 from torch.utils.data import DataLoader
 
 from manydepth.utils import readlines
-from manydepth.options import MonodepthOptions
+from manydepth.options_custom import MonodepthOptions
 from manydepth import datasets, networks
 from manydepth.layers import transformation_from_parameters, disp_to_depth
 import tqdm
@@ -89,7 +90,7 @@ def evaluate(opt):
 
         # Setup dataloaders
         filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
-        filenames = filenames[::2]
+
         if opt.eval_teacher:
             encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "mono_depth.pth")
@@ -128,6 +129,12 @@ def evaluate(opt):
                                                      is_train=False,
                                                      img_ext=img_ext)
 
+        elif opt.eval_split =='custom':
+            dataset = datasets.CustomRAWDataset(opt.data_path, filenames,
+                                               encoder_dict['height'], encoder_dict['width'],
+                                               frames_to_load, 4,
+                                               is_train=False,
+                                               img_ext=img_ext)
         else:
             dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                                encoder_dict['height'], encoder_dict['width'],
@@ -136,7 +143,7 @@ def evaluate(opt):
                                                img_ext=img_ext)
 
         
-        dataloader = DataLoader(dataset, 1, shuffle=False, num_workers=opt.num_workers,
+        dataloader = DataLoader(dataset, opt.batch_size, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
         # setup models
@@ -253,7 +260,7 @@ def evaluate(opt):
 
                     if opt.zero_cost_volume:
                         relative_poses *= 0
- 
+
                     if opt.post_process:
                         raise NotImplementedError
 
@@ -264,11 +271,12 @@ def evaluate(opt):
                                                            min_depth_bin, max_depth_bin)
                     output = depth_decoder(output)
 
-                pred_disp, _ = disp_to_depth(output[("disp", 0)],opt.min_depth, opt.max_depth)
+                pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
                 pred_disps.append(pred_disp)
 
         pred_disps = np.concatenate(pred_disps)
+
         print('finished predicting!')
 
     else:
@@ -281,21 +289,6 @@ def evaluate(opt):
                 os.path.join(splits_dir, "benchmark", "eigen_to_benchmark_ids.npy"))
 
             pred_disps = pred_disps[eigen_to_benchmark_ids]
-
-    #fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
-    #delay = round(1000/30.0)
-    #out = cv2.VideoWriter('output.avi', fourcc, 30.0, (1216, 352))
-    for idx in range(len(pred_disps)):
-        disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
-        depth = np.clip(disp_resized, 0, 10)
-        dmax, dmin = depth.max(), depth.min()
-        depth = (depth)/(11)
-        depth = np.uint8(depth * 256)
-        #out.write(depth)
-        cv2.imshow("test", depth)
-        filename11 = "./image_cmt/" +str(idx).zfill(3) +".png"
-        cv2.imwrite(filename11, depth)
-        cv2.waitKey(33)
 
     if opt.save_pred_disps:
         if opt.zero_cost_volume:
@@ -313,7 +306,7 @@ def evaluate(opt):
         print("-> Evaluation disabled. Done.")
         quit()
 
-    elif opt.eval_split == 'benchmark':
+    elif opt.eval_split == 'benchmark' :
         save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
         print("-> Saving out benchmark predictions to {}".format(save_dir))
         if not os.path.exists(save_dir):
@@ -329,6 +322,21 @@ def evaluate(opt):
 
         print("-> No ground truth is available for the KITTI benchmark, so not evaluating. Done.")
         quit()
+    elif opt.eval_split =='custom':
+        save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
+        print("-> Saving out benchmark predictions to {}".format(save_dir))
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        for idx in range(len(pred_disps)):
+            disp_resized = cv2.resize(pred_disps[idx], (256, 256))
+            depth = 1 / disp_resized
+            depth = np.clip(depth, 0, 255)
+            depth = np.uint8(depth * 150)
+            save_path = os.path.join(save_dir, "{:010d}.png".format(idx))
+            # cv2.imwrite(save_path, depth)
+            # cv2.imshow("test", depth)
+            # cv2.waitKey(1)
 
     if opt.eval_split == 'cityscapes':
         print('loading cityscapes gt depths individually due to their combined size!')
@@ -381,7 +389,7 @@ def evaluate(opt):
             crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
             mask = np.logical_and(mask, crop_mask)
 
-        elif opt.eval_split == 'cityscapes':
+        elif opt.eval_split == 'cityscapes' or opt.eval_split== 'custom':
             mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
         else:

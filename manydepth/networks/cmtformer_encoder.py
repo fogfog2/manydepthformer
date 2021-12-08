@@ -146,7 +146,7 @@ class CMTEncoderMatching(nn.Module):
         #    self.num_ch_enc[1:] *= 4
 
         if num_layers > 34:
-            self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+            self.num_ch_enc = np.array([46, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
             
         else:         
             #self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
@@ -344,10 +344,10 @@ class CMTEncoderMatching(nn.Module):
         post_matching_feats = self.reduce_conv(torch.cat([self.features[-1], cost_volume], 1))
 
 
-        #out = self.upconv(post_matching_feats)
+        out = self.upconv(post_matching_feats)
 
         #self.features.append(self.layer2(post_matching_feats))
-        out = self.cmt(post_matching_feats)
+        out = self.cmt(out)
         self.features = self.features + out
 
         # 

@@ -76,9 +76,9 @@ class Trainer:
 
         # MODEL SETUP
 
-        #encoder_model = "resnet" 
+        encoder_model = "resnet" 
         #encoder_model = "swin_h" 
-        encoder_model = "cmt_h"
+        #encoder_model = "cmt_h"
 
         if "resnet" in encoder_model:            
             self.models["encoder"] = networks.ResnetEncoderMatching(
@@ -162,7 +162,8 @@ class Trainer:
         # DATA
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "cityscapes_preprocessed": datasets.CityscapesPreprocessedDataset,
-                         "kitti_odom": datasets.KITTIOdomDataset}
+                         "kitti_odom": datasets.KITTIOdomDataset,
+                         "custom": datasets.CustomRAWDataset}
         self.dataset = datasets_dict[self.opt.dataset]
 
         fpath = os.path.join("splits", self.opt.split, "{}_files.txt")
