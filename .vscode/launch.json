@@ -13,13 +13,56 @@
             
             "program": "${workspaceFolder}/manydepth/train.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/src/manydepth/result_resnet_mono50",
-                "--batch_size=4",
+                "--log_dir=/home/sj/src/manydepth/kitti_cmt_test",
+                "--batch_size=8",                
                 "--png"]
+
+            // "program": "${workspaceFolder}/manydepth/train_custom.py",
+            // "args": ["--data_path=/home/sj/colon",
+            //     "--log_dir=/home/sj/src/manydepth/colon_origin",
+            //     "--batch_size=8",                
+            //     "--png"]
+    
+
+            // "program": "${workspaceFolder}/manydepth/train_custom.py",
+            // "args": ["--data_path=/home/sj/colon",
+            //     "--log_dir=/home/sj/src/manydepth/colon_cmt4",
+            //     "--batch_size=8",
+            //     "--png"]
+
+            // "program": "${workspaceFolder}/manydepth/eval_save.py",
+            // "args": ["--data_path=/home/sj/colon_syn",
+            //     "--load_weights_folder=/home/sj/src/manydepth/colon_cmt4/mdp/models/weights_19",
+            //     "--eval_mono",
+            //     "--png"]
+
+
+            // "program": "${workspaceFolder}/manydepth/eval_save.py",
+            // "args": ["--data_path=/home/sj/kitti_odo",
+            //     "--load_weights_folder=/home/sj/src/manydepth/result_r18cmtti/mdp/models/weights_34",
+            //     "--eval_mono",
+            //     "--eval_split=odom_9",
+            //     "--png"]
+
+
+            //"program": "${workspaceFolder}/manydepth/view_3d.py"
+            //"program": "${workspaceFolder}/manydepth/view_3d_octre.py"
+
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth.py",
             // "args": ["--data_path=/home/sj/kitti",
-            //     "--load_weights_folder=/home/sj/src/manydepth/result_r18_cmtti_mono50_upconv_r012/mdp/models/weights_16",
+            //     "--load_weights_folder=/home/sj/src/manydepth/kitti_origin/mdp/models/weights_19",
+            //     "--eval_mono",
+            //     "--png"]
+
+
+            // "program": "${workspaceFolder}/manydepth/export_gt_depth.py",
+            // "args": ["--data_path=/home/sj/colon",
+            // "--split=custom"]
+
+            // "program": "${workspaceFolder}/manydepth/evaluate_depth_custom.py",
+            // "args": ["--data_path=/home/sj/colon", 
+            //     "--load_weights_folder=/home/sj/src/manydepth/colon_cmt3/mdp/models/weights_19",
             //     "--eval_mono",
             //     "--png"]
 

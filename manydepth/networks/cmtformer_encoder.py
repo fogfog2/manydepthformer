@@ -146,11 +146,11 @@ class CMTEncoderMatching(nn.Module):
         #    self.num_ch_enc[1:] *= 4
 
         if num_layers > 34:
-            self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+            self.num_ch_enc = np.array([46, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
             
         else:         
             #self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
-            self.num_ch_enc = np.array([64, 64, 128, self.embed_dim*4, self.embed_dim*8])
+            self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
 
         self.upconv = fcconv(self.num_ch_enc[1],self.embed_dim)
         self.backprojector = BackprojectDepth(batch_size=self.num_depth_bins,
@@ -195,7 +195,7 @@ class CMTEncoderMatching(nn.Module):
             self.warp_depths.append(depth)
         self.warp_depths = torch.stack(self.warp_depths, 0).float()
         if self.is_cuda:
-            self.warp_depths = self.warp_depths.cuda()
+            self.warp_depths = self.warp_depths.cuda(self.device)
 
     def match_features(self, current_feats, lookup_feats, relative_poses, K, invK):
         """Compute a cost volume based on L1 difference between current_feats and lookup_feats.
@@ -344,10 +344,10 @@ class CMTEncoderMatching(nn.Module):
         post_matching_feats = self.reduce_conv(torch.cat([self.features[-1], cost_volume], 1))
 
 
-        #out = self.upconv(post_matching_feats)
+        out = self.upconv(post_matching_feats)
 
-        self.features.append(self.layer2(post_matching_feats))
-        out = self.cmt(self.features[-1])
+        #self.features.append(self.layer2(post_matching_feats))
+        out = self.cmt(out)
         self.features = self.features + out
 
         # 
@@ -356,14 +356,15 @@ class CMTEncoderMatching(nn.Module):
 
         return self.features, lowest_cost, confidence_mask
 
-    def cuda(self):
-        super().cuda()
-        self.backprojector.cuda()
-        self.projector.cuda()
+    def cuda(self,device):
+        super().cuda(device)
+        self.backprojector.cuda(device)
+        self.projector.cuda(device)
         self.is_cuda = True
+        self.device = device
         if self.warp_depths is not None:
-            self.warp_depths = self.warp_depths.cuda()
-
+            self.warp_depths = self.warp_depths.cuda(device)
+            
     def cpu(self):
         super().cpu()
         self.backprojector.cpu()
@@ -375,8 +376,10 @@ class CMTEncoderMatching(nn.Module):
     def to(self, device):
         if str(device) == 'cpu':
             self.cpu()
-        elif str(device) == 'cuda':
-            self.cuda()
+        elif str(device) == 'cuda:0':
+            self.cuda(device)
+        elif str(device) == 'cuda:1':
+            self.cuda(device)
         else:
             raise NotImplementedError
 

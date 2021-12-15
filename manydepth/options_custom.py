@@ -33,8 +33,8 @@ class MonodepthOptions:
                                  type=str,
                                  help="which training split to use",
                                  choices=["eigen_zhou", "eigen_full", "odom", "benchmark",
-                                          "cityscapes_preprocessed"],
-                                 default="eigen_zhou")
+                                          "cityscapes_preprocessed", "custom"],
+                                 default="custom")
         self.parser.add_argument("--num_layers",
                                  type=int,
                                  help="number of resnet layers",
@@ -53,20 +53,20 @@ class MonodepthOptions:
         self.parser.add_argument("--dataset",
                                  type=str,
                                  help="dataset to train on",
-                                 default="kitti",
+                                 default="custom",
                                  choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test",
-                                          "cityscapes_preprocessed"])
+                                          "cityscapes_preprocessed", "custom"])
         self.parser.add_argument("--png",
                                  help="if set, trains from raw KITTI png files (instead of jpgs)",
                                  action="store_true")
         self.parser.add_argument("--height",
                                  type=int,
                                  help="input image height",
-                                 default=192)
+                                 default=256)
         self.parser.add_argument("--width",
                                  type=int,
                                  help="input image width",
-                                 default=640)
+                                 default=256)
         self.parser.add_argument("--disparity_smoothness",
                                  type=float,
                                  help="disparity smoothness weight",
@@ -156,10 +156,6 @@ class MonodepthOptions:
         self.parser.add_argument("--no_cuda",
                                  help="if set disables CUDA",
                                  action="store_true")
-        self.parser.add_argument("--cuda_device",
-                                 type=int,
-                                 help="cuda device number",
-                                 default=0)
         self.parser.add_argument("--num_workers",
                                  type=int,
                                  help="number of dataloader workers",
@@ -206,9 +202,9 @@ class MonodepthOptions:
                                  help="optional path to a .npy disparities file to evaluate")
         self.parser.add_argument("--eval_split",
                                  type=str,
-                                 default="eigen",
+                                 default="custom",
                                  choices=["eigen", "eigen_benchmark", "benchmark", "odom_9",
-                                          "odom_10", "cityscapes"],
+                                          "odom_10", "cityscapes", "custom"],
                                  help="which split to run eval on")
         self.parser.add_argument("--save_pred_disps",
                                  help="if set saves predicted disparities",

@@ -15,7 +15,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from manydepth.utils import readlines
-from manydepth.options import MonodepthOptions
+from manydepth.options_custom import MonodepthOptions
 from manydepth import datasets, networks
 from manydepth.layers import transformation_from_parameters, disp_to_depth
 import tqdm
@@ -99,7 +99,19 @@ def evaluate(opt):
         else:
             encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
-            encoder_class = networks.ResnetEncoderMatching
+
+            #encoder_model = "resnet" 
+            #encoder_model = "swin_h" 
+            encoder_model = "cmt_h"
+            
+            if "resnet" in encoder_model:            
+                encoder_class = networks.ResnetEncoderMatching
+            elif "swin_h" in encoder_model:
+                encoder_class = networks.SwinEncoderMatching
+            elif "cmt_h" in encoder_model:
+                encoder_class = networks.CMTEncoderMatching
+                    
+            #encoder_class = networks.ResnetEncoderMatching
 
         encoder_dict = torch.load(encoder_path)
         try:
@@ -108,6 +120,7 @@ def evaluate(opt):
             print('No "height" or "width" keys found in the encoder state_dict, resorting to '
                   'using command line values!')
             HEIGHT, WIDTH = opt.height, opt.width
+
         img_ext = '.png' if opt.png else '.jpg'
         if opt.eval_split == 'cityscapes':
             dataset = datasets.CityscapesEvalDataset(opt.data_path, filenames,
@@ -116,14 +129,20 @@ def evaluate(opt):
                                                      is_train=False,
                                                      img_ext=img_ext)
 
+        elif opt.eval_split =='custom':
+            dataset = datasets.CustomRAWDataset(opt.data_path, filenames,
+                                               encoder_dict['height'], encoder_dict['width'],
+                                               frames_to_load, 4,
+                                               is_train=False,
+                                               img_ext=img_ext)
         else:
             dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                                encoder_dict['height'], encoder_dict['width'],
                                                frames_to_load, 4,
                                                is_train=False,
                                                img_ext=img_ext)
-            
-            
+
+        
         dataloader = DataLoader(dataset, opt.batch_size, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
@@ -252,11 +271,12 @@ def evaluate(opt):
                                                            min_depth_bin, max_depth_bin)
                     output = depth_decoder(output)
 
-                pred_disp, _ = disp_to_depth(output[("disp", 0)],opt.min_depth, opt.max_depth)
+                pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
                 pred_disps.append(pred_disp)
 
         pred_disps = np.concatenate(pred_disps)
+
         print('finished predicting!')
 
     else:
@@ -286,7 +306,7 @@ def evaluate(opt):
         print("-> Evaluation disabled. Done.")
         quit()
 
-    elif opt.eval_split == 'benchmark':
+    elif opt.eval_split == 'benchmark' :
         save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
         print("-> Saving out benchmark predictions to {}".format(save_dir))
         if not os.path.exists(save_dir):
@@ -302,6 +322,21 @@ def evaluate(opt):
 
         print("-> No ground truth is available for the KITTI benchmark, so not evaluating. Done.")
         quit()
+    elif opt.eval_split =='custom':
+        save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
+        print("-> Saving out benchmark predictions to {}".format(save_dir))
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        for idx in range(len(pred_disps)):
+            disp_resized = cv2.resize(pred_disps[idx], (256, 256))
+            depth = 1 / disp_resized
+            depth = np.clip(depth, 0, 255)
+            depth = np.uint8(depth * 150)
+            save_path = os.path.join(save_dir, "{:010d}.png".format(idx))
+            # cv2.imwrite(save_path, depth)
+            # cv2.imshow("test", depth)
+            # cv2.waitKey(1)
 
     if opt.eval_split == 'cityscapes':
         print('loading cityscapes gt depths individually due to their combined size!')
@@ -354,7 +389,7 @@ def evaluate(opt):
             crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
             mask = np.logical_and(mask, crop_mask)
 
-        elif opt.eval_split == 'cityscapes':
+        elif opt.eval_split == 'cityscapes' or opt.eval_split== 'custom':
             mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
         else:

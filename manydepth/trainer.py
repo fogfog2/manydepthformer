@@ -45,7 +45,10 @@ class Trainer:
         self.models = {}
         self.parameters_to_train = []
 
-        self.device = torch.device("cpu" if self.opt.no_cuda else "cuda")
+        #self.device = torch.device("cpu" if self.opt.no_cuda else "cuda:1")
+        cuda_device = "cuda:"+str(self.opt.cuda_device)
+        print(cuda_device)
+        self.device = torch.device(cuda_device)
 
         self.num_scales = len(self.opt.scales)
         self.num_input_frames = len(self.opt.frame_ids)
@@ -76,9 +79,9 @@ class Trainer:
 
         # MODEL SETUP
 
-        encoder_model = "resnet" 
+        #encoder_model = "resnet" 
         #encoder_model = "swin_h" 
-        #encoder_model = "cmt_h"
+        encoder_model = "cmt_h"
 
         if "resnet" in encoder_model:            
             self.models["encoder"] = networks.ResnetEncoderMatching(
@@ -114,7 +117,7 @@ class Trainer:
         self.parameters_to_train += list(self.models["depth"].parameters())
 
         self.models["mono_encoder"] = \
-            networks.ResnetEncoder(50, self.opt.weights_init == "pretrained")
+            networks.ResnetEncoder(18, self.opt.weights_init == "pretrained")
         self.models["mono_encoder"].to(self.device)
 
         self.models["mono_depth"] = \
@@ -162,7 +165,8 @@ class Trainer:
         # DATA
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "cityscapes_preprocessed": datasets.CityscapesPreprocessedDataset,
-                         "kitti_odom": datasets.KITTIOdomDataset}
+                         "kitti_odom": datasets.KITTIOdomDataset,
+                         "custom": datasets.CustomRAWDataset}
         self.dataset = datasets_dict[self.opt.dataset]
 
         fpath = os.path.join("splits", self.opt.split, "{}_files.txt")

@@ -306,13 +306,15 @@ class ResnetEncoderMatching(nn.Module):
 
         return self.features, lowest_cost, confidence_mask
 
-    def cuda(self):
-        super().cuda()
-        self.backprojector.cuda()
-        self.projector.cuda()
+    def cuda(self,device):
+        super().cuda(device)
+        self.backprojector.cuda(device)
+        self.projector.cuda(device)
         self.is_cuda = True
+        self.device = device
         if self.warp_depths is not None:
-            self.warp_depths = self.warp_depths.cuda()
+            self.warp_depths = self.warp_depths.cuda(device)
+            
 
     def cpu(self):
         super().cpu()
@@ -325,8 +327,10 @@ class ResnetEncoderMatching(nn.Module):
     def to(self, device):
         if str(device) == 'cpu':
             self.cpu()
-        elif str(device) == 'cuda':
-            self.cuda()
+        elif str(device) == 'cuda:0':
+            self.cuda(device)
+        elif str(device) == 'cuda:1':
+            self.cuda(device)
         else:
             raise NotImplementedError
 
