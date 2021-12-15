@@ -10,7 +10,6 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1"  # noqa F402
 os.environ["OMP_NUM_THREADS"] = "1"  # noqa F402
 import cv2
 import numpy as np
-
 import torch
 from torch.utils.data import DataLoader
 
@@ -90,7 +89,7 @@ def evaluate(opt):
 
         # Setup dataloaders
         filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
-
+        filenames = filenames[::2]
         if opt.eval_teacher:
             encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "mono_depth.pth")
@@ -99,7 +98,19 @@ def evaluate(opt):
         else:
             encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
-            encoder_class = networks.ResnetEncoderMatching
+
+            encoder_model = "resnet" 
+            #encoder_model = "swin_h" 
+            #encoder_model = "cmt_h"
+            
+            if "resnet" in encoder_model:            
+                encoder_class = networks.ResnetEncoderMatching
+            elif "swin_h" in encoder_model:
+                encoder_class = networks.SwinEncoderMatching
+            elif "cmt_h" in encoder_model:
+                encoder_class = networks.CMTEncoderMatching
+                    
+            #encoder_class = networks.ResnetEncoderMatching
 
         encoder_dict = torch.load(encoder_path)
         try:
@@ -108,6 +119,7 @@ def evaluate(opt):
             print('No "height" or "width" keys found in the encoder state_dict, resorting to '
                   'using command line values!')
             HEIGHT, WIDTH = opt.height, opt.width
+
         img_ext = '.png' if opt.png else '.jpg'
         if opt.eval_split == 'cityscapes':
             dataset = datasets.CityscapesEvalDataset(opt.data_path, filenames,
@@ -122,9 +134,9 @@ def evaluate(opt):
                                                frames_to_load, 4,
                                                is_train=False,
                                                img_ext=img_ext)
-            
-            
-        dataloader = DataLoader(dataset, opt.batch_size, shuffle=False, num_workers=opt.num_workers,
+
+        
+        dataloader = DataLoader(dataset, 1, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
         # setup models
@@ -241,7 +253,7 @@ def evaluate(opt):
 
                     if opt.zero_cost_volume:
                         relative_poses *= 0
-
+ 
                     if opt.post_process:
                         raise NotImplementedError
 
@@ -269,6 +281,21 @@ def evaluate(opt):
                 os.path.join(splits_dir, "benchmark", "eigen_to_benchmark_ids.npy"))
 
             pred_disps = pred_disps[eigen_to_benchmark_ids]
+
+    #fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+    #delay = round(1000/30.0)
+    #out = cv2.VideoWriter('output.avi', fourcc, 30.0, (1216, 352))
+    for idx in range(len(pred_disps)):
+        disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
+        depth = np.clip(disp_resized, 0, 10)
+        dmax, dmin = depth.max(), depth.min()
+        depth = (depth)/(11)
+        depth = np.uint8(depth * 256)
+        #out.write(depth)
+        cv2.imshow("test", depth)
+        filename11 = "./image_cmt/" +str(idx).zfill(3) +".png"
+        cv2.imwrite(filename11, depth)
+        cv2.waitKey(33)
 
     if opt.save_pred_disps:
         if opt.zero_cost_volume:

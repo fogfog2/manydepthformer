@@ -156,6 +156,10 @@ class MonodepthOptions:
         self.parser.add_argument("--no_cuda",
                                  help="if set disables CUDA",
                                  action="store_true")
+        self.parser.add_argument("--cuda_device",
+                                 type=int,
+                                 help="cuda device number",
+                                 default=0)
         self.parser.add_argument("--num_workers",
                                  type=int,
                                  help="number of dataloader workers",

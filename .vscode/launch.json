@@ -13,10 +13,16 @@
             
             "program": "${workspaceFolder}/manydepth/train.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/src/manydepth/kitti_origin",
+                "--log_dir=/home/sj/src/manydepth/kitti_cmt_test",
                 "--batch_size=8",                
                 "--png"]
 
+            // "program": "${workspaceFolder}/manydepth/train_custom.py",
+            // "args": ["--data_path=/home/sj/colon",
+            //     "--log_dir=/home/sj/src/manydepth/colon_origin",
+            //     "--batch_size=8",                
+            //     "--png"]
+    
 
             // "program": "${workspaceFolder}/manydepth/train_custom.py",
             // "args": ["--data_path=/home/sj/colon",
@@ -45,7 +51,7 @@
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth.py",
             // "args": ["--data_path=/home/sj/kitti",
-            //     "--load_weights_folder=/home/sj/src/manydepth/result/mdp/models/weights_19",
+            //     "--load_weights_folder=/home/sj/src/manydepth/kitti_origin/mdp/models/weights_19",
             //     "--eval_mono",
             //     "--png"]
 

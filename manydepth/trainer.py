@@ -45,7 +45,10 @@ class Trainer:
         self.models = {}
         self.parameters_to_train = []
 
-        self.device = torch.device("cpu" if self.opt.no_cuda else "cuda")
+        #self.device = torch.device("cpu" if self.opt.no_cuda else "cuda:1")
+        cuda_device = "cuda:"+str(self.opt.cuda_device)
+        print(cuda_device)
+        self.device = torch.device(cuda_device)
 
         self.num_scales = len(self.opt.scales)
         self.num_input_frames = len(self.opt.frame_ids)
@@ -76,9 +79,9 @@ class Trainer:
 
         # MODEL SETUP
 
-        encoder_model = "resnet" 
+        #encoder_model = "resnet" 
         #encoder_model = "swin_h" 
-        #encoder_model = "cmt_h"
+        encoder_model = "cmt_h"
 
         if "resnet" in encoder_model:            
             self.models["encoder"] = networks.ResnetEncoderMatching(
