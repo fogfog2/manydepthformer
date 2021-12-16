@@ -33,13 +33,20 @@ class MonodepthOptions:
                                  type=str,
                                  help="which training split to use",
                                  choices=["eigen_zhou", "eigen_full", "odom", "benchmark",
-                                          "cityscapes_preprocessed"],
+                                          "cityscapes_preprocessed","custom"],
                                  default="eigen_zhou")
         self.parser.add_argument("--num_layers",
                                  type=int,
                                  help="number of resnet layers",
                                  default=18,
                                  choices=[18, 34, 50, 101, 152])
+        self.parser.add_argument("--train_model",
+                                 type=str,
+                                 help="which model",
+                                 choices=["resnet", "cmt", "swin"],
+                                 default="resnet")
+        
+        
         self.parser.add_argument("--depth_binning",
                                  help="defines how the depth bins are constructed for the cost"
                                       "volume. 'linear' is uniformly sampled in depth space,"
@@ -55,7 +62,7 @@ class MonodepthOptions:
                                  help="dataset to train on",
                                  default="kitti",
                                  choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test",
-                                          "cityscapes_preprocessed"])
+                                          "cityscapes_preprocessed", "custom"])
         self.parser.add_argument("--png",
                                  help="if set, trains from raw KITTI png files (instead of jpgs)",
                                  action="store_true")
@@ -89,7 +96,19 @@ class MonodepthOptions:
                                  type=int,
                                  help="frames to load",
                                  default=[0, -1, 1])
-
+        #cmt options
+        self.parser.add_argument("--cmt_use_upconv",
+                                 help="if set, cmt use upconv)",
+                                 action="store_true")
+        self.parser.add_argument("--cmt_layer",
+                                 type=int,
+                                 help="start cmt layer",
+                                 default=2)
+        self.parser.add_argument("--cmt_dim",
+                                 type=int,
+                                 help="start cmt layer",
+                                 default=46)
+        
         # OPTIMIZATION options
         self.parser.add_argument("--batch_size",
                                  type=int,
@@ -208,7 +227,7 @@ class MonodepthOptions:
                                  type=str,
                                  default="eigen",
                                  choices=["eigen", "eigen_benchmark", "benchmark", "odom_9",
-                                          "odom_10", "cityscapes"],
+                                          "odom_10", "cityscapes", "custom"],
                                  help="which split to run eval on")
         self.parser.add_argument("--save_pred_disps",
                                  help="if set saves predicted disparities",

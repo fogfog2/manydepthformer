@@ -32,7 +32,8 @@ class CMT(t.nn.Module):
                  pa_channelses = [46, 92, 184, 368],
                  R = 3.6,
                  repeats = [2, 2, 10, 2],
-                 input_size = 224):
+                 input_width = 640,
+                 input_height = 192):
         """
         Args :
             --in_channels: default is 3
@@ -58,16 +59,9 @@ class CMT(t.nn.Module):
         #     sizes = [72, 36, 18, 9]
         # else:
         #     raise Exception('No other input sizes!')
-        input_width = 640
-        input_height = 192
-        # input_width = 640
-        # input_height = 192        
-
-
+        
         widths = [int(input_width/4), int(input_width/8), int(input_width/16), int(input_width/32)]
         heights = [int(input_height/4), int(input_height/8), int(input_height/16), int(input_height/32)]
-
-
 
         # 1. Stem
         #self.stem = Stem(in_channels = in_channels, out_channels = stem_channels, stride = 2)
@@ -213,16 +207,166 @@ class CMT(t.nn.Module):
 
         return self.features
 
+class CMT_Layer_Select(t.nn.Module):
+    """Define CMT model"""
 
+    def __init__(self,
+                 cmt_channelses = [46, 92, 184, 368],
+                 pa_channelses = [46, 92, 184, 368],
+                 R = 3.6,
+                 repeats = [2, 2, 10, 2],
+                 input_width = 640,
+                 input_height = 192,
+                 start_layer = 2):
+        """
+        Args :
+            --in_channels: default is 3
+            --stem_channels: stem channels, default is 16
+            --cmt_channelses: list, default is [46, 92, 184, 368]
+            --pa_channels: patch aggregation channels, list, default is [46, 92, 184, 368]
+            --R: expand ratio, default is 3.6
+            --repeats: list, to specify how many CMT blocks stacked together, default is [2, 2, 10, 2]
+            --input_size: default is 224
+            --num_classes: default is 1000 for ImageNet
+        """
+        super(CMT_Layer_Select, self).__init__()
+
+        widths = [int(input_width/4), int(input_width/8), int(input_width/16), int(input_width/32)]
+        heights = [int(input_height/4), int(input_height/8), int(input_height/16), int(input_height/32)]
+        self.start_layer = start_layer
+      
+        self.pa2 = PatchAggregation(in_channels = cmt_channelses[0], out_channels = pa_channelses[1])
+        self.pa3 = PatchAggregation(in_channels = cmt_channelses[1], out_channels = pa_channelses[2])
+        self.pa4 = PatchAggregation(in_channels = cmt_channelses[2], out_channels = pa_channelses[3])
+
+        cmt2 = []
+        for _ in range(repeats[1]):
+            cmt_layer = CMTBlock(input_width = widths[1],
+                                 input_height = heights[1],
+                                 kernel_size = 4,
+                                 d_k = cmt_channelses[1] // 2,
+                                 d_v = cmt_channelses[1] // 2,
+                                 num_heads = 2,
+                                 R = R, in_channels = pa_channelses[1])
+            cmt2.append(cmt_layer)
+        self.cmt2 = t.nn.Sequential(*cmt2)
+
+        cmt3 = []
+        for _ in range(repeats[2]):
+            cmt_layer = CMTBlock(input_width = widths[2],
+                                 input_height = heights[2],
+                                 kernel_size = 2,
+                                 d_k = cmt_channelses[2] // 4,
+                                 d_v = cmt_channelses[2] // 4,
+                                 num_heads = 4,
+                                 R = R, in_channels = pa_channelses[2])
+            cmt3.append(cmt_layer)
+        self.cmt3 = t.nn.Sequential(*cmt3)
+
+        cmt4 = []
+        for _ in range(repeats[3]):
+            cmt_layer = CMTBlock(input_width = widths[3],
+                                 input_height = heights[3],
+                                 kernel_size = 1,
+                                 d_k = cmt_channelses[3] // 8,
+                                 d_v = cmt_channelses[3] // 8,
+                                 num_heads = 8,
+                                 R = R, in_channels = pa_channelses[3])
+            cmt4.append(cmt_layer)
+        self.cmt4 = t.nn.Sequential(*cmt4)
+
+        # 4. Global Avg Pool
+        #self.avg = t.nn.AdaptiveAvgPool2d(1)        
+        numl_layer = len(cmt_channelses)
+        num_features = [int(cmt_channelses[0] * 2 ** i) for i in range(numl_layer)]
+        self.num_features = num_features
+
+        # add a norm layer for each output
+        norm_layer = t.nn.LayerNorm
+        out_indices=(0, 1, 2, 3)
+        self.out_indices = out_indices
+        for i_layer in out_indices:
+            layer = norm_layer(num_features[i_layer])
+            layer_name = f'norm{i_layer}'
+            self.add_module(layer_name, layer)
+
+    def forward(self, x):
+        
+        self.features = []        
+        #3. PA2 + CMTb2
+        
+        if self.start_layer<3:            
+            x_pa2 = self.pa2(x)
+            x_cmtb2 = self.cmt2(x_pa2)
+            
+            norm_layer = getattr(self, f'norm1')
+            x_out = x_cmtb2.permute(0, 3, 2, 1).contiguous()
+            x_out = norm_layer(x_out)
+            x_out = x_out.permute(0, 3, 2, 1).contiguous()
+            self.features.append(x_out)
+        else:
+            x_cmtb2 = x
+        
+        # 4. PA3 + CMTb3
+        if self.start_layer<4:            
+            x_pa3 = self.pa3(x_cmtb2)
+            x_cmtb3 = self.cmt3(x_pa3)
+            
+            norm_layer = getattr(self, f'norm2')
+            x_out = x_cmtb3.permute(0, 3, 2, 1).contiguous()
+            x_out = norm_layer(x_out)
+            x_out = x_out.permute(0, 3, 2, 1).contiguous()
+            self.features.append(x_out)
+        else:
+            x_cmtb3 = x
+
+        # 5. PA4 + CMTb4
+        x_pa4 = self.pa4(x_cmtb3)
+        x_cmtb4 = self.cmt4(x_pa4)     
+        norm_layer = getattr(self, f'norm3')
+
+        x_out = x_cmtb4.permute(0, 3, 2, 1).contiguous()
+        x_out = norm_layer(x_out)
+        x_out = x_out.permute(0, 3, 2, 1).contiguous()
+        self.features.append(x_out)
+
+
+        return self.features
 
 #########################
 #      CMT Models       #
 #########################
+# 0 . Just Layer
+class CMT_Layer(t.nn.Module):
+    """Define CMT-Ti model"""
+
+    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2):
+        """
+        Args :
+            --in_channels: default is 3
+            --input_size: default is 224
+            --num_classes: default is 1000 for ImageNet
+        """
+        super(CMT_Layer, self).__init__()
+
+        self.cmt_layer = CMT_Layer_Select(
+                          cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
+                          pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
+                          R = 3.6,
+                          repeats = [2, 2, 2, 2],
+                          input_width = input_width,
+                          input_height = input_height,
+                          start_layer=start_layer)
+
+    def forward(self, x):
+        x = self.cmt_layer(x)
+        return x
+    
 # 1. CMT-Ti
 class CMT_Ti(t.nn.Module):
     """Define CMT-Ti model"""
 
-    def __init__(self, in_channels = 3, input_size = 224, embed_dim = 46):
+    def __init__(self, in_channels = 3, input_width = 640, input_height = 192, embed_dim = 46):
         """
         Args :
             --in_channels: default is 3
@@ -237,7 +381,8 @@ class CMT_Ti(t.nn.Module):
                           pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           R = 3.6,
                           repeats = [2, 2, 2, 2],
-                          input_size = input_size)
+                          input_width = input_width,
+                          input_height = input_height)
 
     def forward(self, x):
 

@@ -77,6 +77,11 @@ def evaluate(opt):
 
     assert sum((opt.eval_mono, opt.eval_stereo)) == 1, \
         "Please choose mono or stereo evaluation by setting either --eval_mono or --eval_stereo"
+    
+    if opt.cuda_device is None:
+        cuda_device = "cuda:0"
+    else:
+        cuda_device = opt.cuda_device
 
     if opt.ext_disp_to_eval is None:
 
@@ -89,7 +94,7 @@ def evaluate(opt):
 
         # Setup dataloaders
         filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
-        filenames = filenames[::2]
+       # filenames = filenames[::2]
         if opt.eval_teacher:
             encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "mono_depth.pth")
@@ -99,9 +104,9 @@ def evaluate(opt):
             encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
 
-            encoder_model = "resnet" 
+            #encoder_model = "resnet" 
             #encoder_model = "swin_h" 
-            #encoder_model = "cmt_h"
+            encoder_model = "cmt_h"
             
             if "resnet" in encoder_model:            
                 encoder_class = networks.ResnetEncoderMatching
@@ -144,7 +149,9 @@ def evaluate(opt):
             encoder_opts = dict(num_layers=opt.num_layers,
                                 pretrained=False)
         else:
-            encoder_opts = dict(num_layers=opt.num_layers,
+            
+            if "resnet" in encoder_model:            
+                encoder_opts = dict(num_layers=opt.num_layers,
                                 pretrained=False,
                                 input_width=encoder_dict['width'],
                                 input_height=encoder_dict['height'],
@@ -152,6 +159,28 @@ def evaluate(opt):
                                 min_depth_bin=0.1, max_depth_bin=20.0,
                                 depth_binning=opt.depth_binning,
                                 num_depth_bins=opt.num_depth_bins)
+            elif "swin_h" in encoder_model:
+                encoder_opts = dict(num_layers=opt.num_layers,
+                                pretrained=False,
+                                input_width=encoder_dict['width'],
+                                input_height=encoder_dict['height'],
+                                adaptive_bins=True,
+                                min_depth_bin=0.1, max_depth_bin=20.0,
+                                depth_binning=opt.depth_binning,
+                                num_depth_bins=opt.num_depth_bins)
+            elif "cmt_h" in encoder_model:
+                encoder_opts = dict(num_layers=opt.num_layers,
+                                pretrained=False,
+                                input_width=encoder_dict['width'],
+                                input_height=encoder_dict['height'],
+                                adaptive_bins=True,
+                                min_depth_bin=0.1, max_depth_bin=20.0,
+                                depth_binning=opt.depth_binning,
+                                num_depth_bins=opt.num_depth_bins,
+                                upconv = opt.cmt_use_upconv, start_layer = opt.cmt_layer, embed_dim = opt.cmt_dim
+                                )
+            
+            
             pose_enc_dict = torch.load(os.path.join(opt.load_weights_folder, "pose_encoder.pth"))
             pose_dec_dict = torch.load(os.path.join(opt.load_weights_folder, "pose.pth"))
 
@@ -169,10 +198,10 @@ def evaluate(opt):
             pose_dec.eval()
 
             if torch.cuda.is_available():
-                pose_enc.cuda()
-                pose_dec.cuda()
+                pose_enc.cuda(cuda_device)
+                pose_dec.cuda(cuda_device)
 
-        encoder = encoder_class(**encoder_opts)
+        encoder = encoder_class(**encoder_opts)                
         depth_decoder = networks.DepthDecoder(encoder.num_ch_enc)
 
         model_dict = encoder.state_dict()
@@ -183,8 +212,8 @@ def evaluate(opt):
         depth_decoder.eval()
 
         if torch.cuda.is_available():
-            encoder.cuda()
-            depth_decoder.cuda()
+            encoder.cuda(cuda_device)
+            depth_decoder.cuda(cuda_device)
 
         pred_disps = []
 
@@ -285,17 +314,17 @@ def evaluate(opt):
     #fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
     #delay = round(1000/30.0)
     #out = cv2.VideoWriter('output.avi', fourcc, 30.0, (1216, 352))
-    for idx in range(len(pred_disps)):
-        disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
-        depth = np.clip(disp_resized, 0, 10)
-        dmax, dmin = depth.max(), depth.min()
-        depth = (depth)/(11)
-        depth = np.uint8(depth * 256)
-        #out.write(depth)
-        cv2.imshow("test", depth)
-        filename11 = "./image_cmt/" +str(idx).zfill(3) +".png"
-        cv2.imwrite(filename11, depth)
-        cv2.waitKey(33)
+    # for idx in range(len(pred_disps)):
+    #     disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
+    #     depth = np.clip(disp_resized, 0, 10)
+    #     dmax, dmin = depth.max(), depth.min()
+    #     depth = (depth)/(11)
+    #     depth = np.uint8(depth * 256)
+    #     #out.write(depth)
+    #     cv2.imshow("test", depth)
+    #     filename11 = "./image_cmt/" +str(idx).zfill(3) +".png"
+    #     cv2.imwrite(filename11, depth)
+    #     cv2.waitKey(33)
 
     if opt.save_pred_disps:
         if opt.zero_cost_volume:

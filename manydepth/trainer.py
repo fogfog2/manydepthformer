@@ -32,7 +32,6 @@ from collections import OrderedDict
 
 _DEPTH_COLORMAP = plt.get_cmap('plasma', 256)  # for plotting
 
-
 class Trainer:
     def __init__(self, options):
         self.opt = options
@@ -102,7 +101,7 @@ class Trainer:
                 self.opt.num_layers, self.opt.weights_init == "pretrained",
                 input_height=self.opt.height, input_width=self.opt.width,
                 adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
-                depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
+                depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins, upconv = self.opt.cmt_use_upconv, start_layer = self.opt.cmt_layer, embed_dim = self.opt.cmt_dim)
 
 
         self.models["encoder"].to(self.device)
@@ -719,8 +718,16 @@ class Trainer:
 
         depth_errors = compute_depth_errors(depth_gt, depth_pred)
 
+        
+        log_path = self.log_path+"/log.txt"
+        f = open(log_path,'a')        
+        
         for i, metric in enumerate(self.depth_metric_names):
             losses[metric] = np.array(depth_errors[i].cpu())
+            f.write(depth_errors[i].cpu() + ',')
+        
+        f.write('\n')
+        f.close()
 
     def log_time(self, batch_idx, duration, loss):
         """Print a logging statement to the terminal
@@ -733,6 +740,8 @@ class Trainer:
             " | loss: {:.5f} | time elapsed: {} | time left: {}"
         print(print_string.format(self.epoch, batch_idx, samples_per_sec, loss,
                                   sec_to_hm_str(time_sofar), sec_to_hm_str(training_time_left)))
+        
+        
 
     def log(self, mode, inputs, outputs, losses):
         """Write an event to the tensorboard events file
