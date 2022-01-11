@@ -106,8 +106,13 @@ class Trainer:
 
         self.models["encoder"].to(self.device)
 
-        self.models["depth"] = networks.DepthDecoder(
-            self.models["encoder"].num_ch_enc, self.opt.scales)
+
+        if self.opt.use_attention_decoder:            
+            self.models["depth"] = networks.DepthDecoderAttention(
+                self.models["encoder"].num_ch_enc, self.opt.scales)            
+        else:
+            self.models["depth"] = networks.DepthDecoder(
+                self.models["encoder"].num_ch_enc, self.opt.scales)
 
 
         self.models["depth"].to(self.device)
@@ -119,8 +124,12 @@ class Trainer:
             networks.ResnetEncoder(18, self.opt.weights_init == "pretrained")
         self.models["mono_encoder"].to(self.device)
 
-        self.models["mono_depth"] = \
-            networks.DepthDecoder(self.models["mono_encoder"].num_ch_enc, self.opt.scales)
+        if self.opt.use_attention_decoder:            
+            self.models["mono_depth"] = \
+                networks.DepthDecoderAttention(self.models["mono_encoder"].num_ch_enc, self.opt.scales)            
+        else:
+            self.models["mono_depth"] = \
+                networks.DepthDecoder(self.models["mono_encoder"].num_ch_enc, self.opt.scales)
         self.models["mono_depth"].to(self.device)
 
         if self.train_teacher_and_pose:
@@ -521,7 +530,7 @@ class Trainer:
                     # don't update posenet based on multi frame prediction
                     T = T.detach()
 
-                cam_points = self.backproject_depth[source_scale](
+                cam_points,_ = self.backproject_depth[source_scale](
                     depth, inputs[("inv_K", source_scale)])
                 pix_coords = self.project_3d[source_scale](
                     cam_points, inputs[("K", source_scale)], T)

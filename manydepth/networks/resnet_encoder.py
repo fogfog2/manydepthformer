@@ -179,7 +179,7 @@ class ResnetEncoderMatching(nn.Module):
 
             _K = K[batch_idx:batch_idx + 1]
             _invK = invK[batch_idx:batch_idx + 1]
-            world_points = self.backprojector(self.warp_depths, _invK)
+            world_points, _ = self.backprojector(self.warp_depths, _invK)
 
             # loop through ref images adding to the current cost volume
             for lookup_idx in range(_lookup_feats.shape[1]):

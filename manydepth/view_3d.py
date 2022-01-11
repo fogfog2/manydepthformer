@@ -140,7 +140,7 @@ def inference():
     fov_set.points=o3d.utility.Vector3dVector(fov)
     fov_set.colors=o3d.utility.Vector3dVector(np.float64(fov_color))
 
-    cam_points = backproject_depth(pred_depth, invk)    
+    cam_points,_ = backproject_depth(pred_depth, invk)    
     test = cam_points.cpu()[0].numpy()
     
 

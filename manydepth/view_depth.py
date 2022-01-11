@@ -255,7 +255,7 @@ import tqdm
 
                 pred_disp, _ = disp_to_depth(output[("disp", 0)],opt.min_depth, opt.max_depth)
 
-                cam_points = backproject_depth(pred_disp, invK)
+                cam_points, _ = backproject_depth(pred_disp, invK)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
                 temp_k = invK.cpu().numpy()
                 

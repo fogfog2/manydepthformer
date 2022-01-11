@@ -96,6 +96,11 @@ class MonodepthOptions:
                                  type=int,
                                  help="frames to load",
                                  default=[0, -1, 1])
+        #decoder option
+        self.parser.add_argument("--use_attention_decoder",
+                                 help="if set, cmt use upconv)",
+                                 action="store_true")
+        
         #cmt options
         self.parser.add_argument("--cmt_use_upconv",
                                  help="if set, cmt use upconv)",
