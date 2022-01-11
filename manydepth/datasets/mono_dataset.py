@@ -155,8 +155,8 @@ class MonoDataset(data.Dataset):
                     try:
                         inputs[("color", i, -1)] = self.get_color(
                             folder, frame_index + i, side, do_flip)
-                        # inputs[("raw_color", i, 0)] = self.to_tensor(self.get_color(
-                        #     folder, frame_index + i, side, do_flip))
+                        inputs[("raw_color", i, 0)] = self.to_tensor(self.get_color(
+                             folder, frame_index + i, side, do_flip))
                     except FileNotFoundError as e:
                         if i != 0:
                             # fill with dummy values

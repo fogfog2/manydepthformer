@@ -83,7 +83,11 @@ class CustomRAWDataset(CustomDataset):
         base, ext = os.path.splitext(os.path.basename(folder))
         f_idx = int(base[-4:])+frame_index
 
-        path = os.path.join(self.data_path,  os.path.dirname(folder), str(f_idx).zfill(4) + ext)
+        #new
+        path = os.path.join(self.data_path, folder)
+        
+        #synthetic
+        #path = os.path.join(self.data_path,  os.path.dirname(folder), str(f_idx).zfill(4) + ext)
         return path
 
     def get_depth(self, folder, frame_index, side, do_flip):

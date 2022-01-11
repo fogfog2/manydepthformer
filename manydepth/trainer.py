@@ -78,9 +78,9 @@ class Trainer:
 
         # MODEL SETUP
 
-        #encoder_model = "resnet" 
+        encoder_model = "resnet" 
         #encoder_model = "swin_h" 
-        encoder_model = "cmt_h"
+        #encoder_model = "cmt_h"
 
         if "resnet" in encoder_model:            
             self.models["encoder"] = networks.ResnetEncoderMatching(

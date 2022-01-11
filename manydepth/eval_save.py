@@ -15,7 +15,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from manydepth.utils import readlines
-from manydepth.options import MonodepthOptions
+from manydepth.options_custom import MonodepthOptions
 from manydepth import datasets, networks
 from manydepth.layers import transformation_from_parameters, disp_to_depth, BackprojectDepth
 import tqdm
@@ -56,6 +56,9 @@ import tqdm
     MAX_DEPTH = 80
 
     device = torch.device("cuda")
+    
+    cuda_device = "cuda:"+str(opt.cuda_device)
+    
     frames_to_load = [0]
     if opt.use_future_frame:
         frames_to_load.append(1)
@@ -68,7 +71,7 @@ import tqdm
 
     if opt.ext_disp_to_eval is None:
 
-        opt.load_weights_folder = os.path.expanduser(opt.load_weights_folder)
+        opt.load_weightopts_folder = os.path.expanduser(opt.load_weights_folder)
 
         assert os.path.isdir(opt.load_weights_folder), \
             "Cannot find a folder at {}".format(opt.load_weights_folder)
@@ -77,8 +80,10 @@ import tqdm
 
         # Setup dataloaders
         #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
-        filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
+        #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
         #filenames = readlines("/home/sj/colon_syn/test_files.txt")
+        #filenames = readlines("/home/sj/colon/test_files_3.txt")
+        filenames = readlines("/media/sj/data/colon/images/images/test_files.txt")
         #filenames = filenames[::2]
         if opt.eval_teacher:
             encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
@@ -89,9 +94,9 @@ import tqdm
             encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
 
-            #encoder_model = "resnet" 
+            encoder_model = "resnet" 
             #encoder_model = "swin_h" 
-            encoder_model = "cmt_h"
+            #encoder_model = "cmt_h"
             
             if "resnet" in encoder_model:            
                 encoder_class = networks.ResnetEncoderMatching
@@ -119,22 +124,22 @@ import tqdm
                                                      img_ext=img_ext)
 
         else:
-            # dataset = datasets.CustomRAWDataset(opt.data_path, filenames,
-            #                                    encoder_dict['height'], encoder_dict['width'],
-            #                                    frames_to_load, 4,
-            #                                    is_train=False,
-            #                                    img_ext=img_ext)
+            dataset = datasets.CustomRAWDataset(opt.data_path, filenames,
+                                               encoder_dict['height'], encoder_dict['width'],
+                                               frames_to_load, 4,
+                                               is_train=False,
+                                               img_ext=img_ext)
             # dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
             #                                    encoder_dict['height'], encoder_dict['width'],
             #                                    frames_to_load, 4,
             #                                    is_train=False,
             #                                    img_ext=img_ext)
             
-            dataset = datasets.KITTIOdomDataset(opt.data_path, filenames,
-                                               encoder_dict['height'], encoder_dict['width'],
-                                               frames_to_load, 4,
-                                               is_train=False,
-                                               img_ext=img_ext)
+            # dataset = datasets.KITTIOdomDataset(opt.data_path, filenames,
+            #                                    encoder_dict['height'], encoder_dict['width'],
+            #                                    frames_to_load, 4,
+            #                                    is_train=False,
+            #                                    img_ext=img_ext)
 
         
         dataloader = DataLoader(dataset, 1, shuffle=False, num_workers=opt.num_workers,
@@ -145,7 +150,8 @@ import tqdm
             encoder_opts = dict(num_layers=opt.num_layers,
                                 pretrained=False)
         else:
-            encoder_opts = dict(num_layers=opt.num_layers,
+            if "resnet" in encoder_model:            
+                encoder_opts = dict(num_layers=opt.num_layers,
                                 pretrained=False,
                                 input_width=encoder_dict['width'],
                                 input_height=encoder_dict['height'],
@@ -153,6 +159,26 @@ import tqdm
                                 min_depth_bin=0.1, max_depth_bin=20.0,
                                 depth_binning=opt.depth_binning,
                                 num_depth_bins=opt.num_depth_bins)
+            elif "swin_h" in encoder_model:
+                encoder_opts = dict(num_layers=opt.num_layers,
+                                pretrained=False,
+                                input_width=encoder_dict['width'],
+                                input_height=encoder_dict['height'],
+                                adaptive_bins=True,
+                                min_depth_bin=0.1, max_depth_bin=20.0,
+                                depth_binning=opt.depth_binning,
+                                num_depth_bins=opt.num_depth_bins)
+            elif "cmt_h" in encoder_model:
+                encoder_opts = dict(num_layers=opt.num_layers,
+                                pretrained=False,
+                                input_width=encoder_dict['width'],
+                                input_height=encoder_dict['height'],
+                                adaptive_bins=True,
+                                min_depth_bin=0.1, max_depth_bin=20.0,
+                                depth_binning=opt.depth_binning,
+                                num_depth_bins=opt.num_depth_bins,
+                                upconv = False, start_layer =2, embed_dim = 46
+                                )
             pose_enc_dict = torch.load(os.path.join(opt.load_weights_folder, "pose_encoder.pth"))
             pose_dec_dict = torch.load(os.path.join(opt.load_weights_folder, "pose.pth"))
 
@@ -170,8 +196,8 @@ import tqdm
             pose_dec.eval()
 
             if torch.cuda.is_available():
-                pose_enc.cuda()
-                pose_dec.cuda()
+                pose_enc.cuda(cuda_device)
+                pose_dec.cuda(cuda_device)
 
         encoder = encoder_class(**encoder_opts)
         depth_decoder = networks.DepthDecoder(encoder.num_ch_enc)
@@ -184,8 +210,8 @@ import tqdm
         depth_decoder.eval()
 
         if torch.cuda.is_available():
-            encoder.cuda()
-            depth_decoder.cuda()
+            encoder.cuda(cuda_device)
+            depth_decoder.cuda(cuda_device)
 
         # backproject_depth = BackprojectDepth(1, g_height, g_width)
         # backproject_depth.to("cuda")
@@ -300,7 +326,7 @@ import tqdm
     
     
     for idx in range(len(pred_disps)):
-        disp_resized = cv2.resize(pred_disps[idx], (1216, 352))        
+        disp_resized = cv2.resize(pred_disps[idx], (256, 256))        
         depth = np.clip(disp_resized, 0, 10)
         dmax, dmin = depth.max(), depth.min()
         depth = (depth)/(11)

@@ -6,7 +6,7 @@ import cv2
 from manydepth.layers import disp_to_depth, BackprojectDepth
 import torch
 
-dir_base = "image_cmt"
+dir_base = "result/colon2/image_cmt"
 intrinsic_dir = dir_base+"_intrinsic"
 pose_dir = dir_base+"_pose"
 rgb_dir = dir_base+"_rgb"
@@ -19,15 +19,16 @@ rgb_list = sorted(os.listdir(rgb_dir))
 pcd = o3d.geometry.PointCloud()
 vis = o3d.visualization.VisualizerWithKeyCallback()
 counter = 0
-WIDTH  = 640
-HEIGHT = 192
+WIDTH  = 256
+HEIGHT = 256
 backproject_depth = BackprojectDepth(1, HEIGHT, WIDTH)
 
 
 SHOW_UNPROJECTED_DEPTH = True
 init_pose = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
 T = init_pose
-
+acc_colored = []
+acc_point = []
 def update_pose(PrevT, T):
     cam_to_world = np.dot( PrevT , T)
     xyzs = cam_to_world[:3, 3]
@@ -86,13 +87,13 @@ def set_fov_line():
     return fov, fov_lines, fov_color
 
 def inference():
-    #global pcd
+    global pcd
     global counter
     global fov_set
     global T
 
 
-    pcd = o3d.geometry.PointCloud()
+    temp_pcd = o3d.geometry.PointCloud()
     if len(depth_list)-1 < counter:                
         counter = 0
 
@@ -102,6 +103,9 @@ def inference():
 
     #depth 
     np_pred_depth = cv2.resize(d_image, (WIDTH, HEIGHT))
+    
+    kernel = np.ones((5,5), np.float32) / 25
+    np_pred_depth = cv2.filter2D(np_pred_depth ,-1, kernel)
     pred_depth = torch.Tensor(np_pred_depth)
     pred_depth = torch.unsqueeze(pred_depth, 0)
     pred_depth = torch.unsqueeze(pred_depth, 0)
@@ -151,21 +155,56 @@ def inference():
     streamarray = np.reshape(streamarray, (3,-1))
     streamarray = np.transpose(streamarray)        
     
-    mask = streamarray[:,2]<0.5
-    streamarray = streamarray[mask]
-    colored=colored[mask]
+    print(streamarray[:,2].min())
+    print(streamarray[:,2].max())
     
-    # mask = streamarray[:,0]<0.0
+    mask = streamarray[:,2]>0.3
+    mask2 = streamarray[:,2]<0.5
+    
+    mask_a = mask & mask2
+    streamarray = streamarray[mask_a]
+    
+    colored=colored[mask_a]
+    
+    # mask = streamarray[:,0]<0.5
     # streamarray = streamarray[mask]
     # colored=colored[mask]
     
+    # global acc_colored
+    # global acc_point
+    
 
-    pcd.colors = o3d.utility.Vector3dVector(colored)
-    pcd.points = o3d.utility.Vector3dVector(streamarray)
+    
+    
+    # pcd.colors = o3d.utility.Vector3dVector(np_acc_col)
+    # pcd.points = o3d.utility.Vector3dVector(np_acc_point)
+    
+    # current frame transform
+    temp_pcd.colors = o3d.utility.Vector3dVector(colored)
+    temp_pcd.points = o3d.utility.Vector3dVector(streamarray)
     T, xyzs = update_pose(T, np_pose)
-    pcd.transform(T)
+    temp_pcd.transform(T)
     fov_set.transform(T)
-    vis.add_geometry(pcd)   
+    
+    #accumulate point
+    np_current_points =np.asarray(temp_pcd.points)
+    np_current_colors = np.asarray(temp_pcd.colors)
+    
+    acc_point.append(np_current_points)     
+    acc_colored.append(np_current_colors)
+    
+    np_acc_col = np.concatenate(acc_colored)
+    np_acc_point = np.concatenate(acc_point)
+    
+    pcd.colors = o3d.utility.Vector3dVector(np_acc_col)
+    pcd.points = o3d.utility.Vector3dVector(np_acc_point)
+    
+    #pcd.colors = o3d.utility.Vector3dVector(np_current_colors)
+    #pcd.points = o3d.utility.Vector3dVector(np_current_points)
+    
+    #if counter%5 ==0:
+    #    vis.add_geometry(pcd)   
+    vis.update_geometry(pcd)   
     vis.update_geometry(fov_set)
     counter = counter+1
 
@@ -203,6 +242,8 @@ if __name__ == "__main__":
     vis.add_geometry(pcd)    
     vis.add_geometry(axis_line_set)    
     vis.add_geometry(fov_set)
+    
+    #vis.register_key_callback(65,animation_callback)
     vis.register_animation_callback(animation_callback)
     vis.run()
 
