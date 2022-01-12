@@ -24,9 +24,19 @@
                 "--cmt_layer=2",
                 "--cmt_dim=46",
                 "--use_attention_decoder",
-                "--train_model=cmt",
                 "--png"]
 
+            // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
+            // "args": ["--data_path=/home/sj/kitti", 
+            //     //"--load_weights_folder=/media/sj/data/manydepth/kitti_resnet_attention/mdp/models/weights_19",
+            //     "--load_weights_folder=/media/sj/data/manydepth/prev/kitti_origin/mdp/models/weights_19",
+            //     "--eval_mono",
+            //     // "--cmt_use_upconv",
+            //     // "--cmt_layer=3",
+            //     // "--cmt_dim=46",
+            //     "--train_model=resnet",
+            //     //"--use_attention_decoder",
+            //     "--png"]
             // "program": "${workspaceFolder}/manydepth/train.py",
             // "args": ["--data_path=/home/sj/kitti",
             //     "--log_dir=/media/sj/data/manydepth/kitti_cmt_test_erase",

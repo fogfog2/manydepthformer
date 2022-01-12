@@ -202,7 +202,12 @@ def evaluate(opt):
                 pose_dec.cuda(cuda_device)
 
         encoder = encoder_class(**encoder_opts)                
-        depth_decoder = networks.DepthDecoder(encoder.num_ch_enc)
+        
+        
+        if opt.use_attention_decoder:            
+            depth_decoder = networks.DepthDecoderAttention(encoder.num_ch_enc) 
+        else:
+            depth_decoder = networks.DepthDecoder(encoder.num_ch_enc)
 
         model_dict = encoder.state_dict()
         encoder.load_state_dict({k: v for k, v in encoder_dict.items() if k in model_dict})
