@@ -78,7 +78,7 @@ class Trainer:
 
         # MODEL SETUP
 
-        encoder_model = "resnet" 
+        encoder_model = self.opt.train_model 
         #encoder_model = "swin_h" 
         #encoder_model = "cmt_h"
 
@@ -89,14 +89,14 @@ class Trainer:
                 adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
                 depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
 
-        elif "swin_h" in encoder_model:
+        elif "swin" in encoder_model:
             self.models["encoder"] = networks.SwinEncoderMatching(
                 self.opt.num_layers, self.opt.weights_init == "pretrained",
                 input_height=self.opt.height, input_width=self.opt.width,
                 adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
                 depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
 
-        elif "cmt_h" in encoder_model:
+        elif "cmt" in encoder_model:
             self.models["encoder"] = networks.CMTEncoderMatching(
                 self.opt.num_layers, self.opt.weights_init == "pretrained",
                 input_height=self.opt.height, input_width=self.opt.width,
@@ -157,7 +157,7 @@ class Trainer:
             self.model_optimizer, self.opt.scheduler_step_size, 0.1)
 
 
-        if "swin_h" in encoder_model:
+        if "swin" in encoder_model:
            self.load_model_with_swin()
         
         if self.opt.load_weights_folder is not None:            

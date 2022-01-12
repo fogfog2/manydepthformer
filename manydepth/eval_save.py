@@ -94,15 +94,15 @@ import tqdm
             encoder_path = os.path.join(opt.load_weights_folder, "encoder.pth")
             decoder_path = os.path.join(opt.load_weights_folder, "depth.pth")
 
-            encoder_model = "resnet" 
+            encoder_model = opt.train_model
             #encoder_model = "swin_h" 
             #encoder_model = "cmt_h"
             
             if "resnet" in encoder_model:            
                 encoder_class = networks.ResnetEncoderMatching
-            elif "swin_h" in encoder_model:
+            elif "swin" in encoder_model:
                 encoder_class = networks.SwinEncoderMatching
-            elif "cmt_h" in encoder_model:
+            elif "cmt" in encoder_model:
                 encoder_class = networks.CMTEncoderMatching
                     
             #encoder_class = networks.ResnetEncoderMatching

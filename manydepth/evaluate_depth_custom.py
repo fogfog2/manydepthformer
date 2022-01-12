@@ -102,13 +102,13 @@ def evaluate(opt):
 
             #encoder_model = "resnet" 
             #encoder_model = "swin_h" 
-            encoder_model = "cmt_h"
+            encoder_model =  opt.train_model
             
             if "resnet" in encoder_model:            
                 encoder_class = networks.ResnetEncoderMatching
-            elif "swin_h" in encoder_model:
+            elif "swin" in encoder_model:
                 encoder_class = networks.SwinEncoderMatching
-            elif "cmt_h" in encoder_model:
+            elif "cmt" in encoder_model:
                 encoder_class = networks.CMTEncoderMatching
                     
             #encoder_class = networks.ResnetEncoderMatching

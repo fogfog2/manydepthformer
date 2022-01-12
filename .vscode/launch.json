@@ -13,15 +13,18 @@
             
             "program": "${workspaceFolder}/manydepth/train.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/media/sj/data/manydepth/kitti_resnet_attention",
+                "--log_dir=/home/sj/manydepth/kitti_resnet_base",
                 "--batch_size=8",
                 "--height=640",
                 "--width=192",
                 "--num_epochs=30",
                 "--freeze_teacher_epoch=15",
                 "--scheduler_step_size=5",
-                "--train_model=resnet",
+                "--cmt_use_upconv",
+                "--cmt_layer=3",
+                "--cmt_dim=46",
                 "--use_attention_decoder",
+                "--train_model=cmt",
                 "--png"]
 
             // "program": "${workspaceFolder}/manydepth/train.py",
