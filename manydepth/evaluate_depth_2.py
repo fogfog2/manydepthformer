@@ -159,7 +159,7 @@ def evaluate(opt):
                                 min_depth_bin=0.1, max_depth_bin=20.0,
                                 depth_binning=opt.depth_binning,
                                 num_depth_bins=opt.num_depth_bins)
-            elif "swin_h" in encoder_model:
+            elif "swin" in encoder_model:
                 encoder_opts = dict(num_layers=opt.num_layers,
                                 pretrained=False,
                                 input_width=encoder_dict['width'],
@@ -168,7 +168,7 @@ def evaluate(opt):
                                 min_depth_bin=0.1, max_depth_bin=20.0,
                                 depth_binning=opt.depth_binning,
                                 num_depth_bins=opt.num_depth_bins)
-            elif "cmt_h" in encoder_model:
+            elif "cmt" in encoder_model:
                 encoder_opts = dict(num_layers=opt.num_layers,
                                 pretrained=False,
                                 input_width=encoder_dict['width'],

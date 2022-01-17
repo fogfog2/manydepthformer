@@ -129,7 +129,7 @@ class CMTEncoderMatching(nn.Module):
 
         self.stem_channel = 64
         self.embed_dim= embed_dim    
-        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer)
+        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv)
 
         # self.stem_channel = 64
         # self.embed_dim= 52    

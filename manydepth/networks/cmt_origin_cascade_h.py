@@ -217,7 +217,8 @@ class CMT_Layer_Select(t.nn.Module):
                  repeats = [2, 2, 10, 2],
                  input_width = 640,
                  input_height = 192,
-                 start_layer = 2):
+                 start_layer = 2,
+                 use_upconv = True):
         """
         Args :
             --in_channels: default is 3
@@ -234,10 +235,21 @@ class CMT_Layer_Select(t.nn.Module):
         widths = [int(input_width/4), int(input_width/8), int(input_width/16), int(input_width/32)]
         heights = [int(input_height/4), int(input_height/8), int(input_height/16), int(input_height/32)]
         self.start_layer = start_layer
-      
+
+        
+
+        
         self.pa2 = PatchAggregation(in_channels = cmt_channelses[0], out_channels = pa_channelses[1])
         self.pa3 = PatchAggregation(in_channels = cmt_channelses[1], out_channels = pa_channelses[2])
         self.pa4 = PatchAggregation(in_channels = cmt_channelses[2], out_channels = pa_channelses[3])
+
+        if use_upconv ==False:
+            if start_layer==2:
+                self.pa2 = PatchAggregation(in_channels = 64, out_channels = pa_channelses[1])
+            elif start_layer==3:
+                self.pa3 = PatchAggregation(in_channels = 128, out_channels = pa_channelses[2])
+            elif start_layer==4:
+                self.pa4 = PatchAggregation(in_channels = 256, out_channels = pa_channelses[3])
 
         cmt2 = []
         for _ in range(repeats[1]):
@@ -340,7 +352,7 @@ class CMT_Layer_Select(t.nn.Module):
 class CMT_Layer(t.nn.Module):
     """Define CMT-Ti model"""
 
-    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2):
+    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2, use_upconv = True):
         """
         Args :
             --in_channels: default is 3
@@ -356,7 +368,8 @@ class CMT_Layer(t.nn.Module):
                           repeats = [2, 2, 2, 2],
                           input_width = input_width,
                           input_height = input_height,
-                          start_layer=start_layer)
+                          start_layer=start_layer,
+                          use_upconv = use_upconv)
 
     def forward(self, x):
         x = self.cmt_layer(x)
