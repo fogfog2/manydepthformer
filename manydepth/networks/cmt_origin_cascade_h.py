@@ -365,7 +365,7 @@ class CMT_Layer(t.nn.Module):
                           cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           R = 3.6,
-                          repeats = [2, 2, 2, 2],
+                          repeats = [2, 2, 6, 2],
                           input_width = input_width,
                           input_height = input_height,
                           start_layer=start_layer,
