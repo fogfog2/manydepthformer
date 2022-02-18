@@ -18,7 +18,7 @@ import torchvision.models as models
 import torch.utils.model_zoo as model_zoo
 from manydepth.layers import BackprojectDepth, Project3D
 
-from manydepth.networks.cmt_origin_cascade_h import CMT_Layer, CMT_Ti, CMT_XS, CMT_XS2, CMT_B
+from manydepth.networks.cmt_origin_cascade_h import CMT_Layer, CMT_Feature, CMT_Ti, CMT_XS, CMT_XS2, CMT_B
 
 class ResNetMultiImageInput(models.ResNet):
     """Constructs a resnet model with varying number of input images.
@@ -88,7 +88,7 @@ class CMTEncoderMatching(nn.Module):
 
     def __init__(self, num_layers, pretrained, input_height, input_width,
                  min_depth_bin=0.1, max_depth_bin=20.0, num_depth_bins=96,
-                 adaptive_bins=False, depth_binning='linear', upconv=True, start_layer=2, embed_dim = 46):
+                 adaptive_bins=False, depth_binning='linear', upconv=True, start_layer=2, embed_dim = 46, use_cmt_feature =False):
 
         super(CMTEncoderMatching, self).__init__()
 
@@ -107,7 +107,7 @@ class CMTEncoderMatching(nn.Module):
         
         self.use_upconv = upconv
         self.cmt_start_layer = start_layer
-
+        self.use_cmt_feature = use_cmt_feature
         resnets = {18: models.resnet18,
                    34: models.resnet34,
                    50: models.resnet50,
@@ -129,7 +129,10 @@ class CMTEncoderMatching(nn.Module):
 
         self.stem_channel = 64
         self.embed_dim= embed_dim    
-        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv)
+        
+        
+        self.cmt_feature = CMT_Feature(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv)        
+        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv or self.use_cmt_feature)
 
         # self.stem_channel = 64
         # self.embed_dim= 52    
@@ -144,7 +147,7 @@ class CMTEncoderMatching(nn.Module):
         # self.cmt = CMT_B(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
     
         
-        
+        #cmt_feature
         self.num_ch_enc = np.array([64, 64, 128, 256, 512])
         if num_layers > 34:
            self.num_ch_enc[1:] *= 4
@@ -161,6 +164,8 @@ class CMTEncoderMatching(nn.Module):
             self.num_ch_enc[i] = self.embed_dim * value
             
         
+        if use_cmt_feature:            
+            self.num_ch_enc = np.array([64, self.embed_dim, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
         self.res_ch_enc = np.array([64, 64, 128, 256, 512])
 
         self.upconv = fcconv(self.res_ch_enc[1],self.embed_dim)
@@ -183,6 +188,11 @@ class CMTEncoderMatching(nn.Module):
 
         self.reduce_conv = nn.Sequential(nn.Conv2d(self.num_ch_enc[1] + self.num_depth_bins,
                                                    out_channels=self.num_ch_enc[1],
+                                                   kernel_size=3, stride=1, padding=1),
+                                         nn.ReLU(inplace=True)
+                                         )
+        self.reduce_conv_cmt_feature= nn.Sequential(nn.Conv2d(embed_dim + self.num_depth_bins,
+                                                   out_channels=embed_dim,
                                                    kernel_size=3, stride=1, padding=1),
                                          nn.ReLU(inplace=True)
                                          )
@@ -298,6 +308,22 @@ class CMTEncoderMatching(nn.Module):
         image = (image - 0.45) / 0.225  # imagenet normalisation
         feats_0 = self.layer0(image)
         feats_1 = self.layer1(feats_0)
+        if return_all_feats:
+            return [feats_0, feats_1]
+        else:
+            return feats_1
+        
+        
+    def cmt_feature_extraction(self, image, return_all_feats=False):
+        """ Run feature extraction on an image - first 2 blocks of ResNet"""
+
+        image = (image - 0.45) / 0.225  # imagenet normalisation
+        #feats_0 = self.layer0(image)
+        #feats_1 = self.layer1(feats_0)
+        
+        features =self.cmt_feature(image)
+        feats_0 = features[0]
+        feats_1 = features[1]
 
         if return_all_feats:
             return [feats_0, feats_1]
@@ -326,7 +352,10 @@ class CMTEncoderMatching(nn.Module):
                 ):
 
         # feature extraction
-        self.features = self.feature_extraction(current_image, return_all_feats=True)
+        if not self.use_cmt_feature:
+            self.features = self.feature_extraction(current_image, return_all_feats=True)
+        else:
+            self.features = self.cmt_feature_extraction(current_image, return_all_feats=True)
         current_feats = self.features[-1]
 
         # feature extraction on lookup images - disable gradients to save memorylayer2
@@ -336,8 +365,13 @@ class CMTEncoderMatching(nn.Module):
 
             batch_size, num_frames, chns, height, width = lookup_images.shape
             lookup_images = lookup_images.reshape(batch_size * num_frames, chns, height, width)
-            lookup_feats = self.feature_extraction(lookup_images,
-                                                   return_all_feats=False)
+            
+            if not self.use_cmt_feature:
+                lookup_feats = self.feature_extraction(lookup_images,
+                                                    return_all_feats=False)
+            else:
+                lookup_feats = self.cmt_feature_extraction(lookup_images,
+                                                    return_all_feats=False)
             _, chns, height, width = lookup_feats.shape
             lookup_feats = lookup_feats.reshape(batch_size, num_frames, chns, height, width)
 
@@ -355,7 +389,11 @@ class CMTEncoderMatching(nn.Module):
 
         # mask the cost volume based on the confidence
         cost_volume *= confidence_mask.unsqueeze(1)
-        post_matching_feats = self.reduce_conv(torch.cat([self.features[-1], cost_volume], 1))
+        
+        if not self.use_cmt_feature:
+            post_matching_feats = self.reduce_conv(torch.cat([self.features[-1], cost_volume], 1))
+        else:
+            post_matching_feats = self.reduce_conv_cmt_feature(torch.cat([self.features[-1], cost_volume], 1))
 
         if self.use_upconv:
             out = self.upconv(post_matching_feats)

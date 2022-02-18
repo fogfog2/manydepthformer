@@ -12,8 +12,8 @@
             "env": {"PYTHONPATH": "${cwd}" },
             
             "program": "${workspaceFolder}/manydepth/train.py",
-            "args": ["--data_path=/media/sj/data/kitti",
-                "--log_dir=/home/sj/manydepth/kitti_cmt_noupconv_2262_l3",
+            "args": ["--data_path=/home/sj/kitti",
+                "--log_dir=/home/sj/manydepth/kitti_cmt_raw",
                 "--batch_size=8",
                 "--height=192",
                 "--width=640",
@@ -21,10 +21,11 @@
                 "--freeze_teacher_epoch=15",
                 "--scheduler_step_size=5",
                // "--cmt_use_upconv",
-                "--cmt_layer=3",
-                "--cmt_dim=46",
+                "--cmt_layer=2",
+                //"--cmt_dim=46",
                 "--train_model=cmt",
-                "--use_attention_decoder",
+                //"--use_attention_decoder",
+                "--cmt_use_feature",
                 "--png"]
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",

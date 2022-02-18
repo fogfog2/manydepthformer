@@ -99,8 +99,7 @@ class MonodepthOptions:
         #decoder option
         self.parser.add_argument("--use_attention_decoder",
                                  help="if set, cmt use upconv)",
-                                 action="store_true")
-        
+                                 action="store_true")        
         #cmt options
         self.parser.add_argument("--cmt_use_upconv",
                                  help="if set, cmt use upconv)",
@@ -113,6 +112,10 @@ class MonodepthOptions:
                                  type=int,
                                  help="start cmt layer",
                                  default=46)
+        
+        self.parser.add_argument("--cmt_use_feature",
+                                 help="start cmt layer",
+                                 action="store_true")
         
         # OPTIMIZATION options
         self.parser.add_argument("--batch_size",
