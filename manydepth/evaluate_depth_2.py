@@ -177,7 +177,7 @@ def evaluate(opt):
                                 min_depth_bin=0.1, max_depth_bin=20.0,
                                 depth_binning=opt.depth_binning,
                                 num_depth_bins=opt.num_depth_bins,
-                                upconv = opt.cmt_use_upconv, start_layer = opt.cmt_layer, embed_dim = opt.cmt_dim
+                                upconv = opt.cmt_use_upconv, start_layer = opt.cmt_layer, embed_dim = opt.cmt_dim,  use_cmt_feature = opt.cmt_use_feature
                                 )
             
             
