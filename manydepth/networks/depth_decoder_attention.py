@@ -16,13 +16,14 @@ from .cbam import CBAM
 
 
 class DepthDecoderAttention(nn.Module):
-    def __init__(self, num_ch_enc, scales=range(4), num_output_channels=1, use_skips=True):
+    def __init__(self, num_ch_enc, scales=range(4), num_output_channels=1, use_skips=True, no_spatial=False):
         super(DepthDecoderAttention, self).__init__()
 
         self.num_output_channels = num_output_channels
         self.use_skips = use_skips
         self.upsample_mode = 'nearest'
         self.scales = scales
+        self.no_spatial = no_spatial
 
         self.num_ch_enc = num_ch_enc
         self.num_ch_dec = np.array([16, 32, 64, 128, 256])
@@ -36,7 +37,7 @@ class DepthDecoderAttention(nn.Module):
             self.convs[("upconv", i, 0)] = ConvBlock(num_ch_in, num_ch_out)
             
             # cbam
-            self.convs[("cbam", i, 0)] = CBAM(num_ch_in,16)
+            self.convs[("cbam", i, 0)] = CBAM(num_ch_in,16,no_spatial=self.no_spatial)
             
             # upconv_1
             num_ch_in = self.num_ch_dec[i]

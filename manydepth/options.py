@@ -116,6 +116,10 @@ class MonodepthOptions:
         self.parser.add_argument("--cmt_use_feature",
                                  help="start cmt layer",
                                  action="store_true")
+
+        self.parser.add_argument("--attention_only_channel",
+                                 help="attetnion channel",
+                                 action="store_true")
         
         # OPTIMIZATION options
         self.parser.add_argument("--batch_size",

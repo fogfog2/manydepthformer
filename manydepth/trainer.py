@@ -106,10 +106,9 @@ class Trainer:
 
         self.models["encoder"].to(self.device)
 
-
         if self.opt.use_attention_decoder:            
             self.models["depth"] = networks.DepthDecoderAttention(
-                self.models["encoder"].num_ch_enc, self.opt.scales)            
+                self.models["encoder"].num_ch_enc, self.opt.scales , no_spatial= self.opt.attention_only_channel)            
         else:
             self.models["depth"] = networks.DepthDecoder(
                 self.models["encoder"].num_ch_enc, self.opt.scales)
@@ -121,12 +120,12 @@ class Trainer:
         self.parameters_to_train += list(self.models["depth"].parameters())
 
         self.models["mono_encoder"] = \
-            networks.ResnetEncoder(18, self.opt.weights_init == "pretrained")
+            networks.ResnetEncoder(50, self.opt.weights_init == "pretrained")
         self.models["mono_encoder"].to(self.device)
 
         if self.opt.use_attention_decoder:            
             self.models["mono_depth"] = \
-                networks.DepthDecoderAttention(self.models["mono_encoder"].num_ch_enc, self.opt.scales)            
+                networks.DepthDecoderAttention(self.models["mono_encoder"].num_ch_enc, self.opt.scales, no_spatial= self.opt.attention_only_channel)            
         else:
             self.models["mono_depth"] = \
                 networks.DepthDecoder(self.models["mono_encoder"].num_ch_enc, self.opt.scales)

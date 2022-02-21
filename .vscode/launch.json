@@ -13,7 +13,7 @@
             
             "program": "${workspaceFolder}/manydepth/train.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/manydepth/kitti_cmt_raw",
+                "--log_dir=/home/sj/manydepth/kitti_cmt_attention_cw_t50",
                 "--batch_size=8",
                 "--height=192",
                 "--width=640",
@@ -24,8 +24,9 @@
                 "--cmt_layer=2",
                 //"--cmt_dim=46",
                 "--train_model=cmt",
-                //"--use_attention_decoder",
-                "--cmt_use_feature",
+                "--use_attention_decoder",
+                "--attention_only_channel",
+                //"--cmt_use_feature",
                 "--png"]
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
