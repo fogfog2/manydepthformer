@@ -58,12 +58,11 @@ class DepthDecoderAttention(nn.Module):
         # decoder
         x = input_features[-1]
         for i in range(4, -1, -1):
-            
             x = self.convs[("cbam", i, 0)](x)
-            x = self.convs[("upconv", i, 0)](x)
-            x = [upsample(x)]
+            x = self.convs[("upconv", i, 0)](x)# channel -> [64 64 92 184 368] -> [16,32, 64, 128, 256]
+            x = [upsample(x)] # 
             if self.use_skips and i > 0:
-                x += [input_features[i - 1]]
+                x += [input_features[i - 1]] # 184 + upscaled 256 
             x = torch.cat(x, 1)
             x = self.convs[("upconv", i, 1)](x)
             if i in self.scales:

@@ -205,7 +205,7 @@ def evaluate(opt):
         
         
         if opt.use_attention_decoder:            
-            depth_decoder = networks.DepthDecoderAttention(encoder.num_ch_enc) 
+            depth_decoder = networks.DepthDecoderAttention(encoder.num_ch_enc , no_spatial= opt.attention_only_channel)           
         else:
             depth_decoder = networks.DepthDecoder(encoder.num_ch_enc)
 
