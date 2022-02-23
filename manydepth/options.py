@@ -121,6 +121,10 @@ class MonodepthOptions:
                                  help="attetnion channel",
                                  action="store_true")
         
+        #swin option
+        self.parser.add_argument("--swin_use_feature",
+                                 help="start swin layer",
+                                 action="store_true")
         # OPTIMIZATION options
         self.parser.add_argument("--batch_size",
                                  type=int,

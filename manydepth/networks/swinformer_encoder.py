@@ -5,6 +5,7 @@
 # available in the LICENSE file.
 
 import os
+from matplotlib import use
 os.environ["MKL_NUM_THREADS"] = "1"  # noqa F402
 os.environ["NUMEXPR_NUM_THREADS"] = "1"  # noqa F402
 os.environ["OMP_NUM_THREADS"] = "1"  # noqa F402
@@ -18,7 +19,7 @@ import torchvision.models as models
 import torch.utils.model_zoo as model_zoo
 from manydepth.layers import BackprojectDepth, Project3D
 
-from manydepth.networks.SwinTransformer_h import SwinTransformer
+from manydepth.networks.SwinTransformer_h import SwinTransformer, SwinTransformer_Feature
 
 class ResNetMultiImageInput(models.ResNet):
     """Constructs a resnet model with varying number of input images.
@@ -88,13 +89,14 @@ class SwinEncoderMatching(nn.Module):
 
     def __init__(self, num_layers, pretrained, input_height, input_width,
                  min_depth_bin=0.1, max_depth_bin=20.0, num_depth_bins=96,
-                 adaptive_bins=False, depth_binning='linear', drop_path_rate = 0.2):
+                 adaptive_bins=False, depth_binning='linear', drop_path_rate = 0.2,  use_swin_feature= False) :
 
         super(SwinEncoderMatching, self).__init__()
 
         self.adaptive_bins = adaptive_bins
         self.depth_binning = depth_binning
         self.set_missing_to_max = True
+        self.use_swin_feature = use_swin_feature
 
         self.num_ch_enc = np.array([64, 64, 192, 384, 768])
         self.num_depth_bins = num_depth_bins
@@ -125,6 +127,17 @@ class SwinEncoderMatching(nn.Module):
 
         self.embed_dim= 96  
         self.in_channels=[ self.embed_dim , self.embed_dim*2, self.embed_dim * 4, self.embed_dim * 8]
+        
+        if use_swin_feature:
+            self.num_ch_enc = [48, self.embed_dim, self.embed_dim*2,  self.embed_dim * 4, self.embed_dim * 8]
+        self.swin_feature = SwinTransformer_Feature(embed_dim=self.embed_dim,
+                                    depths= [ 2, 2, 2, 2  ],
+                                    num_heads=[ 3, 6, 12, 24],
+                                    drop_path_rate=drop_path_rate,
+                                    ape = False,
+                                    init_dim = 48,
+                                    out_indices=(0, 1, 2, 3),
+                                    in_channels = self.num_ch_enc)
         self.swin = SwinTransformer(embed_dim=self.embed_dim,
                                     depths= [ 2, 2, 2, 2  ],
                                     num_heads=[ 3, 6, 12, 24],
@@ -274,6 +287,23 @@ class SwinEncoderMatching(nn.Module):
             return [feats_0, feats_1]
         else:
             return feats_1
+        
+    def swin_feature_extraction(self, image, return_all_feats=False):
+        """ Run feature extraction on an image - first 2 blocks of ResNet"""
+
+        image = (image - 0.45) / 0.225  # imagenet normalisation
+        # feats_0 = self.layer0(image)
+        # feats_1 = self.layer1(feats_0)
+        
+
+        features =self.swin_feature(image)
+        feats_0 = features[0]
+        feats_1 = features[1]        
+
+        if return_all_feats:
+            return [feats_0, feats_1]
+        else:
+            return feats_1
 
     def indices_to_disparity(self, indices):
         """Convert cost volume indices to 1/depth for visualisation"""
@@ -297,7 +327,10 @@ class SwinEncoderMatching(nn.Module):
                 ):
 
         # feature extraction
-        self.features = self.feature_extraction(current_image, return_all_feats=True)
+        if not self.use_swin_feature:
+            self.features = self.feature_extraction(current_image, return_all_feats=True)
+        else:
+            self.features = self.swin_feature_extraction(current_image, return_all_feats=True)
         current_feats = self.features[-1]
 
         # feature extraction on lookup images - disable gradients to save memorylayer2
@@ -307,7 +340,12 @@ class SwinEncoderMatching(nn.Module):
 
             batch_size, num_frames, chns, height, width = lookup_images.shape
             lookup_images = lookup_images.reshape(batch_size * num_frames, chns, height, width)
-            lookup_feats = self.feature_extraction(lookup_images,
+            
+            if not self.use_swin_feature:
+                lookup_feats = self.feature_extraction(lookup_images,
+                                                   return_all_feats=False)
+            else:
+                lookup_feats = self.swin_feature_extraction(lookup_images,
                                                    return_all_feats=False)
             _, chns, height, width = lookup_feats.shape
             lookup_feats = lookup_feats.reshape(batch_size, num_frames, chns, height, width)
@@ -328,7 +366,11 @@ class SwinEncoderMatching(nn.Module):
         cost_volume *= confidence_mask.unsqueeze(1)
         post_matching_feats = self.reduce_conv(torch.cat([self.features[-1], cost_volume], 1))
 
-        out = self.upconv(post_matching_feats)
+        if not self.use_swin_feature:
+            out = self.upconv(post_matching_feats)
+        else:
+            out = post_matching_feats
+        
         out = self.swin(out)
         self.features = self.features + out
 

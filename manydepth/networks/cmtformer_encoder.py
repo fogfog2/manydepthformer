@@ -318,7 +318,7 @@ class CMTEncoderMatching(nn.Module):
         """ Run feature extraction on an image - first 2 blocks of ResNet"""
 
         image = (image - 0.45) / 0.225  # imagenet normalisation
-        #feats_0 = self.layer0(image)
+        #feats_0 = self.layer0(imagswin_featuree)
         #feats_1 = self.layer1(feats_0)
         
         features =self.cmt_feature(image)

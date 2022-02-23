@@ -94,7 +94,7 @@ class Trainer:
                 self.opt.num_layers, self.opt.weights_init == "pretrained",
                 input_height=self.opt.height, input_width=self.opt.width,
                 adaptive_bins=True, min_depth_bin=0.1, max_depth_bin=20.0,
-                depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins)
+                depth_binning=self.opt.depth_binning, num_depth_bins=self.opt.num_depth_bins, use_swin_feature = self.opt.swin_use_feature)
 
         elif "cmt" in encoder_model:
             self.models["encoder"] = networks.CMTEncoderMatching(
