@@ -167,7 +167,7 @@ def evaluate(opt):
                                 adaptive_bins=True,
                                 min_depth_bin=0.1, max_depth_bin=20.0,
                                 depth_binning=opt.depth_binning,
-                                num_depth_bins=opt.num_depth_bins)
+                                num_depth_bins=opt.num_depth_bins, use_swin_feature = opt.swin_use_feature)
             elif "cmt" in encoder_model:
                 encoder_opts = dict(num_layers=opt.num_layers,
                                 pretrained=False,
