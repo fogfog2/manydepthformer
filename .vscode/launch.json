@@ -23,12 +23,31 @@
             //     //"--cmt_use_upconv",
             //     //"--cmt_layer=2",
             //     //"--cmt_dim=46",
-            //      "--train_model=swin",
-            //      "--use_attention_decoder",
+            //      "--train_model=resnet",
+            //      //"--use_attention_decoder",
             //     // "--attention_only_channel",
-            //     "--swin_use_feature",
+            //     //"--swin_use_feature",
             //     "--png"]
-
+                
+                "program": "${workspaceFolder}/manydepth/train.py",
+                "args": ["--data_path=/media/sj/data/cityscapes_preprocessed",
+                    "--log_dir=/home/sj/manydepth/city_resenet",
+                    "--dataset=cityscapes_preprocessed",
+                    "--split=cityscapes_preprocessed",
+                    "--batch_size=8",
+                    "--height=192",
+                    "--width=512",
+                    "--num_epochs=40",
+                    "--freeze_teacher_epoch=5",
+                    "--scheduler_step_size=5",
+                    //"--cmt_use_upconv",
+                    //"--cmt_layer=2",
+                    //"--cmt_dim=46",
+                     "--train_model=resnet",
+                     //"--use_attention_decoder",
+                    // "--attention_only_channel",
+                    //"--swin_use_feature",
+                    "--png"]
             // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
             // "args": ["--data_path=/media/sj/data/kitti", 
             //     //"--load_weights_folder=/media/sj/data/manydepth/kitti_cmt_attention_noupconv/mdp/models/weights_19",
@@ -42,18 +61,27 @@
             //     "--png"]
 
 
-            "program": "${workspaceFolder}/manydepth/eval_save2.py",
-            "args": ["--data_path=/home/sj/kitti",
-                "--load_weights_folder=/home/sj/manydepth/kitti_cmt_attention_22/mdp/models/weights_19",
-                "--cmt_layer=3",
-                "--cmt_dim=46",
-                "--train_model=cmt",
-                "--use_attention_decoder",
-                "--eval_mono",
-                "--png"]
+            // "program": "${workspaceFolder}/manydepth/eval_save2.py",
+            // "args": ["--data_path=/home/sj/kitti",
+            //     "--load_weights_folder=/home/sj/manydepth/kitti_cmt_attention22_t50_l3/mdp/models/weights_34",
+            //     "--cmt_layer=3",
+            //     "--cmt_dim=46",
+            //     "--train_model=cmt",
+            //     "--use_attention_decoder",
+            //     "--eval_mono",
+            //     "--png"]
 
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
+            // "program": "${workspaceFolder}/manydepth/eval_save2.py",
+            // "args": ["--data_path=/home/sj/kitti",
+            //     "--load_weights_folder=/home/sj/manydepth/kitti_cmt_attention22_t50_l3/mdp/models/weights_34",
+            //     "--cmt_layer=3",
+            //     "--cmt_dim=46",
+            //     "--train_model=cmt",
+            //     "--use_attention_decoder",
+            //     "--eval_mono",
+            //     "--png"]
             // "args": ["--data_path=/home/sj/kitti", 
             //     //"--load_weights_folder=/media/sj/data/manydepth/kitti_resnet_attention/mdp/models/weights_19",
             //     "--load_weights_folder=/home/sj/manydepth/kitti_cmt_attention_t50_l2e4/mdp/models/weights_22",

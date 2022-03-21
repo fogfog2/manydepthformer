@@ -79,7 +79,9 @@ import tqdm
         print("-> Loading weights from {}".format(opt.load_weights_folder))
 
         # Setup dataloaders
-        filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
+        
+        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
+        #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
         #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
         #filenames = readlines("/home/sj/colon_syn/test_files.txt")
         #filenames = readlines("/home/sj/colon/test_files_3.txt")
@@ -124,16 +126,16 @@ import tqdm
                                                      img_ext=img_ext)
 
         else:
-            dataset = datasets.CustomRAWDataset(opt.data_path, filenames,
-                                               encoder_dict['height'], encoder_dict['width'],
-                                               frames_to_load, 4,
-                                               is_train=False,
-                                               img_ext=img_ext)
-            # dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
+            # dataset = datasets.CustomRAWDataset(opt.data_path, filenames,
             #                                    encoder_dict['height'], encoder_dict['width'],
             #                                    frames_to_load, 4,
             #                                    is_train=False,
             #                                    img_ext=img_ext)
+            dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
+                                               encoder_dict['height'], encoder_dict['width'],
+                                               frames_to_load, 4,
+                                               is_train=False,
+                                               img_ext=img_ext)
             
             # dataset = datasets.KITTIOdomDataset(opt.data_path, filenames,
             #                                    encoder_dict['height'], encoder_dict['width'],
@@ -303,11 +305,12 @@ import tqdm
                 
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
                 temp_invk = invK.cpu().numpy()                
-                temp_k = K.cpu().numpy()                
+                temp_k = K.cpu().numpy()         
+                rgb = input_color.cpu().numpy()       
                 pred_disps.append(pred_disp)
                 inv_ks.append(temp_invk)
                 ks.append(temp_k)
-                input_images.append(input_image)
+                input_images.append(rgb)
                 pose= relative_poses.cpu()[0].numpy()
                 poses.append(pose)
 
@@ -334,13 +337,16 @@ import tqdm
         disp_resized = cv2.resize(pred_disps[idx], (640, 192))        
         depth = np.clip(disp_resized, 0, 10)
         dmax, dmin = depth.max(), depth.min()
-        depth = (depth)/(11)
-        depth = np.uint8(depth * 256)
+        size = dmax-dmin
+        depth = (depth-dmin)/size
+       # depth = 1-depth
+        depth = np.uint8(depth * 255)
         #out.write(dtest = cam_pointsepth)
         cv2.imshow("test", depth)
         
         filename11 = "./image_cmt/" +str(idx).zfill(3) +".png"
         os.makedirs("image_cmt", exist_ok=True)
+        depth = cv2.applyColorMap(depth , cv2.COLORMAP_VIRIDIS)
         cv2.imwrite(filename11, depth)
         
         
@@ -348,9 +354,21 @@ import tqdm
         filename12 = "./image_cmt_rgb/" +str(idx).zfill(3) +".png"
         os.makedirs("image_cmt_rgb", exist_ok=True)
         image = np.uint8(input_images[idx]*255)
-        rgb = np.dstack((image[2],image[1],image[0]))
-        rgb_resized = cv2.resize(rgb, (1216, 352))      
-        cv2.imwrite(filename12, rgb_resized)
+        # rgb = np.dstack((image[2],image[1],image[0]))
+        #rgb_resized = cv2.resize(image[0], (640, 192))      
+        
+        #image = np.rollaxis(image,axis=0 , start=2)
+        image = image.transpose(1,2,0)
+        image = image[:,:, ::-1]
+        cv2.imwrite(filename12, image)
+
+
+        # filename12 = "./image_cmt_rgb/" +str(idx).zfill(3) +".png"
+        # os.makedirs("image_cmt_rgb", exist_ok=True)
+        # image = np.uint8(input_images[idx]*255)
+        # rgb = np.dstack((image[2],image[1],image[0]))
+        # rgb_resized = cv2.resize(rgb, (640, 192))      
+        # cv2.imwrite(filename12, rgb_resized)
 
 
 
