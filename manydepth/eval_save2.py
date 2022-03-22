@@ -236,7 +236,7 @@ import tqdm
                 if opt.static_camera:
                     for f_i in frames_to_load:
                         data["color", f_i, 0] = data[('color', 0, 0)]
-                input_image = data[('raw_color', 0, 0)]
+                #input_image = data[('raw_color', 0, 0)]
 
                 # predict poses
                 pose_feats = {f_i: data["color", f_i, 0] for f_i in frames_to_load}

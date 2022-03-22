@@ -56,7 +56,7 @@ class CityscapesEvalDataset(MonoDataset):
         intrinsics[1, :] /= self.RAW_HEIGHT * 0.75
         return intrinsics
 
-    def get_color(self, city, frame_name, side, do_flip, is_sequence=False):
+    def get_color(self, city, frame_name, side, do_flip, is_sequence=True):
         if side is not None:
             raise ValueError("Cityscapes dataset doesn't know how to deal with sides yet")
 
