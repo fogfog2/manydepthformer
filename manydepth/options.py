@@ -151,11 +151,22 @@ class MonodepthOptions:
                                  default=15,
                                  help="Sets the epoch number at which to freeze the teacher"
                                       "network and the pose network.")
-
+        self.parser.add_argument("--freeze_teacher_step",
+                                 type=int,
+                                 default=-1,
+                                 help="Sets the step number at which to freeze the teacher"
+                                      "network and the pose network. By default is -1 and so"
+                                      "will not be used.")
+        self.parser.add_argument("--pytorch_random_seed",
+                                 default=None,
+                                 type=int)
         # ABLATION options
         self.parser.add_argument("--v1_multiscale",
                                  help="if set, uses monodepth v1 multiscale",
                                  action="store_true")
+        self.parser.add_argument("--save_intermediate_models",
+                                 help="if set, save the model each time we log to tensorboard",
+                                 action='store_true')
         self.parser.add_argument("--avg_reprojection",
                                  help="if set, uses average reprojection loss",
                                  action="store_true")
