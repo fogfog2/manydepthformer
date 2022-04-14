@@ -158,7 +158,7 @@ class Trainer:
         #self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
         self.model_optimizer = optim.AdamW(self.parameters_to_train, self.opt.learning_rate)
         self.model_lr_scheduler = optim.lr_scheduler.StepLR(
-            self.model_optimizer, self.opt.scheduler_step_size, 0.1)
+            self.model_optimizer, self.opt.scheduler_step_size, self.opt.scheduler_step_ratio)
 
 
         if "swin" in encoder_model:
@@ -278,7 +278,7 @@ class Trainer:
             self.parameters_to_train += list(self.models["depth"].parameters())
             self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
             self.model_lr_scheduler = optim.lr_scheduler.StepLR(
-                self.model_optimizer, self.opt.scheduler_step_size, 0.1)
+                self.model_optimizer, self.opt.scheduler_step_size, self.opt.scheduler_step_ratio)
 
             # set eval so that teacher + pose batch norm is running average
             self.set_eval()
@@ -314,6 +314,9 @@ class Trainer:
                 if "depth_gt" in inputs:
                     self.compute_depth_losses(inputs, outputs, losses)
 
+                outputs['lr'] = self.model_optimizer.param_groups[0]['lr']
+
+                print("lr: ", outputs['lr'])
                 self.log("train", inputs, outputs, losses)
                 self.val()             
 
@@ -784,6 +787,9 @@ class Trainer:
         writer = self.writers[mode]
         for l, v in losses.items():
             writer.add_scalar("{}".format(l), v, self.step)
+
+        if outputs.get("lr") is not None:
+            writer.add_scalar("lr", outputs["lr"], self.step)
 
         for j in range(min(4, self.opt.batch_size)):  # write a maxmimum of four images
             s = 0  # log only max scale
