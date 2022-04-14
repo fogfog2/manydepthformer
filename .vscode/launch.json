@@ -63,7 +63,18 @@
             //     "--train_model=cmt",
             //     "--use_attention_decoder",
             //     "--png"]
-
+            // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
+            // "args": ["--data_path=/media/sj/data/cityscapes",
+            //     "--load_weights_folder=/media/sj/data/manydepth/pc3/city_cmt_22_attention/mdp/models/weights_39",
+            //     //"--load_weights_folder=/home/sj/manydepth/city_resenet/mdp/models/weights_20",
+            //     "--eval_split=cityscapes",
+            //     "--eval_mono",
+            //     //"--cmt_use_upconv",
+            //     "--cmt_layer=3",
+            //    // "--cmt_dim=46",
+            //     "--train_model=cmt",
+            //     "--use_attention_decoder",
+            //     "--png"]
 
             // "program": "${workspaceFolder}/manydepth/eval_save2.py",
             // "args": ["--data_path=/home/sj/kitti",
@@ -74,7 +85,17 @@
             //     "--use_attention_decoder",
             //     "--eval_mono",
             //     "--png"]
-
+            
+            // "program": "${workspaceFolder}/manydepth/eval_save2.py",
+            // "args": ["--data_path=/media/sj/data/cityscapes",
+            //     "--load_weights_folder=/media/sj/data/manydepth/pc3/city_cmt_22_attention/mdp/models/weights_39",
+            //     "--eval_split=cityscapes",
+            //     "--cmt_layer=3",
+            //     "--cmt_dim=46",
+            //     "--train_model=cmt",
+            //     "--use_attention_decoder",
+            //     "--eval_mono",
+            //     "--png"]
 
             // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
             // "program": "${workspaceFolder}/manydepth/eval_save2.py",

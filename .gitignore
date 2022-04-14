@@ -3,5 +3,6 @@
 .vscode/launch.json
 *.png
 *.txt
+*.npy
 /result
 *.npy
