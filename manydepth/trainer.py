@@ -194,7 +194,7 @@ class Trainer:
             frames_to_load, 4, is_train=True, img_ext=img_ext)
         self.train_loader = DataLoader(
             train_dataset, self.opt.batch_size, True,
-            freeze_teacher_stepnum_workers=self.opt.num_workers, pin_memory=True, drop_last=True,
+            num_workers=self.opt.num_workers, pin_memory=True, drop_last=True,
             worker_init_fn=seed_worker)
         val_dataset = self.dataset(
             self.opt.data_path, val_filenames, self.opt.height, self.opt.width,
