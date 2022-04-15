@@ -314,7 +314,6 @@ class Trainer:
                 if "depth_gt" in inputs:
                     self.compute_depth_losses(inputs, outputs, losses)
 
-                outputs['lr'] = self.model_optimizer.param_groups[0]['lr']
 
                 
                 self.log("train", inputs, outputs, losses)
@@ -325,6 +324,8 @@ class Trainer:
 
             if self.step == self.opt.freeze_teacher_step:
                 self.freeze_teacher()
+                
+            outputs['lr'] = self.model_optimizer.param_groups[0]['lr']
             print("step: {}, lr: {}".format(self.step,outputs['lr']))
             self.step += 1
         self.model_lr_scheduler.step()
