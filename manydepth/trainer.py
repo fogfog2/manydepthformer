@@ -155,8 +155,8 @@ class Trainer:
             self.parameters_to_train += list(self.models["pose_encoder"].parameters())
             self.parameters_to_train += list(self.models["pose"].parameters())
 
-        #self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
-        self.model_optimizer = optim.AdamW(self.parameters_to_train, self.opt.learning_rate)
+        self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
+        #self.model_optimizer = optim.AdamW(self.parameters_to_train, self.opt.learning_rate)
         self.model_lr_scheduler = optim.lr_scheduler.StepLR(
             self.model_optimizer, self.opt.scheduler_step_size, self.opt.scheduler_step_ratio)
 
@@ -194,7 +194,7 @@ class Trainer:
             frames_to_load, 4, is_train=True, img_ext=img_ext)
         self.train_loader = DataLoader(
             train_dataset, self.opt.batch_size, True,
-            num_workers=self.opt.num_workers, pin_memory=True, drop_last=True,
+            freeze_teacher_stepnum_workers=self.opt.num_workers, pin_memory=True, drop_last=True,
             worker_init_fn=seed_worker)
         val_dataset = self.dataset(
             self.opt.data_path, val_filenames, self.opt.height, self.opt.width,
@@ -316,7 +316,7 @@ class Trainer:
 
                 outputs['lr'] = self.model_optimizer.param_groups[0]['lr']
 
-                print("lr: ", outputs['lr'])
+                
                 self.log("train", inputs, outputs, losses)
                 self.val()             
 
@@ -325,7 +325,7 @@ class Trainer:
 
             if self.step == self.opt.freeze_teacher_step:
                 self.freeze_teacher()
-
+            print("step: {}, lr: {}".format(self.step,outputs['lr']))
             self.step += 1
         self.model_lr_scheduler.step()
 

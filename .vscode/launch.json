@@ -31,7 +31,7 @@
                 
                 "program": "${workspaceFolder}/manydepth/train.py",
                 "args": ["--data_path=/media/sj/data2/cityscapes_preprocessed",
-                    "--log_dir=/home/sj/manydepth/city_cmt_22_attention_s2_r01_56k_r1",
+                    "--log_dir=/home/sj/manydepth/city_cmt_22_attention_s2_r01_56k_r1_adam",
                     "--dataset=cityscapes_preprocessed",
                     "--split=cityscapes_preprocessed",
                     "--batch_size=8",
