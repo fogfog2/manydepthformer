@@ -325,9 +325,11 @@ class Trainer:
             if self.step == self.opt.freeze_teacher_step:
                 self.freeze_teacher()
                 
+            
+            self.step += 1            
             outputs['lr'] = self.model_optimizer.param_groups[0]['lr']
-            print("step: {}, lr: {}".format(self.step,outputs['lr']))
-            self.step += 1
+            
+        print("step: {}, lr: {}".format(self.step,outputs['lr']))            
         self.model_lr_scheduler.step()
 
     def process_batch(self, inputs, is_train=False):
