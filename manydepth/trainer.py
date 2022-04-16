@@ -277,8 +277,10 @@ class Trainer:
             self.parameters_to_train += list(self.models["encoder"].parameters())
             self.parameters_to_train += list(self.models["depth"].parameters())
             self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
+            # self.model_lr_scheduler = optim.lr_scheduler.StepLR(
+            #     self.model_optimizer, self.opt.scheduler_step_size, self.opt.scheduler_step_ratio)
             self.model_lr_scheduler = optim.lr_scheduler.StepLR(
-                self.model_optimizer, self.opt.scheduler_step_size, self.opt.scheduler_step_ratio)
+                self.model_optimizer, self.opt.scheduler_step_freeze_after_size, self.opt.scheduler_step_freeze_after_ratio)
 
             # set eval so that teacher + pose batch norm is running average
             self.set_eval()
