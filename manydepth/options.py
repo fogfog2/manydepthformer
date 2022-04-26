@@ -141,7 +141,7 @@ class MonodepthOptions:
         self.parser.add_argument("--scheduler_step_size",
                                  type=int,
                                  help="step size of the scheduler",
-                                 default=2)
+                                 default=5)
         self.parser.add_argument("--scheduler_step_ratio",
                                  type=float,
                                  help="step ratio of the scheduler",

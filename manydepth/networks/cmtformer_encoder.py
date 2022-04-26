@@ -225,7 +225,12 @@ class CMTEncoderMatching(nn.Module):
         """Compute a cost volume based on L1 difference between current_feats and lookup_feats.
 
         We backwards warp the lookup_feats into the current frame using the estimated relative
-        pose, known intrinsics and using hypothesised depths self.warp_depths (which are either
+        pose, known intrinsics and using hypothesised d    
+        
+        #cmt_feature
+        self.num_ch_enc = np.array([64, 64, 128, 256, 512])
+        if num_layers > 34:
+           self.num_ch_enc[1:] *= 4epths self.warp_depths (which are either
         linear in depth or linear in inverse depth).
 
         If relative_pose == 0 then this indicates that the lookup frame is missing (i.e. we are
@@ -461,7 +466,7 @@ class ResnetEncoderCMT(nn.Module):
     """Pytorch module for a resnet encoder
     """
 
-    def __init__(self, num_layers, pretrained, num_input_images=1, **kwargs):
+    def __init__(self, num_layers, pretrained, num_input_images=1, input_height=192, input_width=640, upconv=True, start_layer=2, embed_dim = 46, use_cmt_feature =False, **kwargs):
         super(ResnetEncoderCMT, self).__init__()
 
 #        self.num_ch_enc = np.array([64, 64, 128, 256, 512])
@@ -482,13 +487,36 @@ class ResnetEncoderCMT(nn.Module):
         
         self.stem_channel = 64
         self.embed_dim= 46    
-        self.cmt = CMT_Ti(in_channels = 3, input_size = 256, embed_dim= self.embed_dim)
+        #self.cmt = CMT_Ti(in_channels = 3, input_width = 640, input_height = 192, embed_dim= self.embed_dim)
+        self.use_upconv = upconv
+        self.cmt_start_layer = start_layer
 
-        if num_layers > 34:
-            self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=start_layer, use_upconv =upconv or use_cmt_feature)
+
+
+        self.layer0 = nn.Sequential(self.encoder.conv1,  self.encoder.bn1, self.encoder.relu)
+        self.layer1 = nn.Sequential(self.encoder.maxpool,  self.encoder.layer1)
+        self.layer2 = self.encoder.layer2
+        self.layer3 = self.encoder.layer3
+
+        self.res_ch_enc = np.array([64, 64, 128, 256, 512])
+        self.upconv = fcconv(self.res_ch_enc[1],self.embed_dim)
+        self.upconv2 = fcconv(self.res_ch_enc[2],self.embed_dim*2)
+        self.upconv3 = fcconv(self.res_ch_enc[3],self.embed_dim*4)
+
+        # if num_layers > 34:
+        #     self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
             
-        else:         
-            self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+        # else:         
+        #     self.num_ch_enc = np.array([64, 64, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])
+
+        self.num_ch_enc = np.array([64, 64, 128, 256, 512])
+        if num_layers > 34:
+            self.num_ch_enc[1:] *= 4
+
+        for i in range(start_layer,5):
+            value = 2**(i-1)
+            self.num_ch_enc[i] = self.embed_dim * value
 
         #if num_layers > 34:
         #    self.num_ch_enc[1:] *= 4
@@ -501,7 +529,24 @@ class ResnetEncoderCMT(nn.Module):
         self.features.append(self.encoder.relu(x))
         self.features.append(self.encoder.layer1(self.encoder.maxpool(self.features[-1])))
 
-        out = self.cmt(self.features[-1])
+
+        if self.cmt_start_layer>2:                
+            post_matching_feats = self.layer2(self.features[-1])                     
+            self.features.append(post_matching_feats)
+            if self.use_upconv:
+                out = self.upconv2(post_matching_feats)
+            else:
+                out = post_matching_feats       
+                
+            if self.cmt_start_layer>3:             
+                post_matching_feats = self.layer3(post_matching_feats)
+                self.features.append(post_matching_feats)
+                if self.use_upconv:
+                    out = self.upconv3(post_matching_feats)
+                else:
+                    out = post_matching_feats     
+
+        out = self.cmt(out)
         self.features = self.features + out
 
         # self.features.append(self.encoder.layer2(self.features[-1]))
