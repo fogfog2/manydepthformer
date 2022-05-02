@@ -326,7 +326,8 @@ class CMT_Layer_Select(t.nn.Module):
                  input_width = 640,
                  input_height = 192,
                  start_layer = 2,
-                 use_upconv = True):
+                 use_upconv = True,
+                 num_layer = 18 ):
         """
         Args :
             --in_channels: default is 3
@@ -350,12 +351,20 @@ class CMT_Layer_Select(t.nn.Module):
         self.pa4 = PatchAggregation(in_channels = cmt_channelses[2], out_channels = pa_channelses[3])
 
         if use_upconv ==False :
-            if start_layer==2:
-                self.pa2 = PatchAggregation(in_channels = 64, out_channels = pa_channelses[1])
-            elif start_layer==3:
-                self.pa3 = PatchAggregation(in_channels = 128, out_channels = pa_channelses[2])
-            elif start_layer==4:
-                self.pa4 = PatchAggregation(in_channels = 256, out_channels = pa_channelses[3])
+            if num_layer == 18:
+                if start_layer==2:
+                    self.pa2 = PatchAggregation(in_channels = 64, out_channels = pa_channelses[1])
+                elif start_layer==3:
+                    self.pa3 = PatchAggregation(in_channels = 128, out_channels = pa_channelses[2])
+                elif start_layer==4:
+                    self.pa4 = PatchAggregation(in_channels = 256, out_channels = pa_channelses[3])
+            elif num_layer >34:
+                if start_layer==2:
+                    self.pa2 = PatchAggregation(in_channels = 256, out_channels = pa_channelses[1])
+                elif start_layer==3:
+                    self.pa3 = PatchAggregation(in_channels = 512, out_channels = pa_channelses[2])
+                elif start_layer==4:
+                    self.pa4 = PatchAggregation(in_channels = 1024, out_channels = pa_channelses[3])
 
         cmt2 = []
         for _ in range(repeats[1]):
@@ -458,7 +467,7 @@ class CMT_Layer_Select(t.nn.Module):
 class CMT_Layer(t.nn.Module):
     """Define CMT-Ti model"""
 
-    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2, use_upconv = True):
+    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2, use_upconv = True, num_layer = 18):
         """
         Args :
             --in_channels: default is 3
@@ -475,7 +484,8 @@ class CMT_Layer(t.nn.Module):
                           input_width = input_width,
                           input_height = input_height,
                           start_layer=start_layer,
-                          use_upconv = use_upconv)
+                          use_upconv = use_upconv,
+                          num_layer= num_layer)
 
     def forward(self, x):
         x = self.cmt_layer(x)

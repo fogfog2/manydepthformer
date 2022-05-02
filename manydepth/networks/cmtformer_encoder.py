@@ -491,7 +491,7 @@ class ResnetEncoderCMT(nn.Module):
         self.use_upconv = upconv
         self.cmt_start_layer = start_layer
 
-        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=start_layer, use_upconv =upconv or use_cmt_feature)
+        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=start_layer, use_upconv =upconv or use_cmt_feature, num_layer = num_layers)
 
 
         self.layer0 = nn.Sequential(self.encoder.conv1,  self.encoder.bn1, self.encoder.relu)
