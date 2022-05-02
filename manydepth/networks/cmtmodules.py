@@ -12,6 +12,28 @@ from torch.nn import functional as F
 import math
 
 
+class Mlp(t.nn.Module):
+    """ Multilayer perceptron."""
+
+    def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=t.nn.GELU, drop=0.):
+        super().__init__()
+        out_features = out_features or in_features
+        hidden_features = hidden_features or in_features
+        self.fc1 = t.nn.Linear(in_features, hidden_features)
+        self.act = act_layer()
+        self.fc2 = t.nn.Linear(hidden_features, out_features)
+        self.drop = t.nn.Dropout(drop)
+
+    def forward(self, x):
+        #x_ = F.layer_norm(x, (c, h, w))
+        
+        x = self.fc1(x)
+        x = self.act(x)
+        x = self.drop(x)
+        x = self.fc2(x)
+        x = self.drop(x)
+        return x 
+    
 #########################
 #  0. Patch Aggregation #
 #########################
@@ -271,12 +293,26 @@ class CMTBlock(t.nn.Module):
                            in_channels = in_channels)
 
         # 3. IRFFN
-        self.irffn = IRFFN(in_channels = in_channels, R = R)
+        self.irffn = IRFFN(in_channels = in_channels, R = R)\
+            
+        # 3-1. MPL
+        self.norm_layer=t.nn.LayerNorm(in_channels)
+        mlp_hidden_dim = in_channels * 4
+        act_layer = t.nn.GELU
+        self.mlp = Mlp(in_features=in_channels, hidden_features=mlp_hidden_dim, act_layer=act_layer)
 
     def forward(self, x):
 
         x = self.lpu(x)
-        x = self.lmhsa(x)
-        x = self.irffn(x)
+        x_ = self.lmhsa(x)
+        x = self.irffn(x) #mem = 11366
+        
+        
+        # B, C, H, W  = x.shape #mem = 11216
+        # x = x_.permute(0, 3, 2, 1).contiguous()
+        # x = x.view(B, W*H, C)
+        # x = self.mlp(self.norm_layer(x))
+        # x = x.view(B, W, H, C)
+        # x = x.permute(0, 3, 2, 1).contiguous()
 
-        return x
+        return x + x_

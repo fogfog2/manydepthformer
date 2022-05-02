@@ -32,10 +32,10 @@ from collections import OrderedDict
 
 _DEPTH_COLORMAP = plt.get_cmap('plasma', 256)  # for plotting
 
-def seed_worker(worker_id):
-    worker_seed = torch.initial_seed() % 2**32
-    np.random.seed(worker_seed)
-    random.seed(worker_seed)
+# def seed_worker(worker_id):
+#     worker_seed = torch.initial_seed() % 2**32
+#     np.random.seed(worker_seed)
+#     random.seed(worker_seed)
 
 class Trainer:
     def __init__(self, options):
@@ -124,13 +124,13 @@ class Trainer:
         self.parameters_to_train += list(self.models["encoder"].parameters())
         self.parameters_to_train += list(self.models["depth"].parameters())
 
-        # self.models["mono_encoder"] = \
-        #     networks.ResnetEncoder(18, self.opt.weights_init == "pretrained")
-        # self.models["mono_encoder"].to(self.device)
-
         self.models["mono_encoder"] = \
-            networks.ResnetEncoderCMT(18, self.opt.weights_init == "pretrained",  input_height=self.opt.height, input_width=self.opt.width,upconv = self.opt.cmt_use_upconv, start_layer = self.opt.cmt_layer, embed_dim = self.opt.cmt_dim, use_cmt_feature = self.opt.cmt_use_feature )
+            networks.ResnetEncoder(18, self.opt.weights_init == "pretrained")
         self.models["mono_encoder"].to(self.device)
+
+        # self.models["mono_encoder"] = \
+        #     networks.ResnetEncoderCMT(18, self.opt.weights_init == "pretrained",  input_height=self.opt.height, input_width=self.opt.width,upconv = self.opt.cmt_use_upconv, start_layer = self.opt.cmt_layer, embed_dim = self.opt.cmt_dim, use_cmt_feature = self.opt.cmt_use_feature )
+        # self.models["mono_encoder"].to(self.device)
 
 
         if self.opt.use_attention_decoder:            
@@ -147,7 +147,7 @@ class Trainer:
 
         self.models["pose_encoder"] = \
             networks.ResnetEncoder(18, self.opt.weights_init == "pretrained",
-                                   num_input_images=self.num_pose_frames)
+                                   num_input_images=self.num_pose_frames)  
         self.models["pose_encoder"].to(self.device)
 
         self.models["pose"] = \
@@ -199,8 +199,9 @@ class Trainer:
             frames_to_load, 4, is_train=True, img_ext=img_ext)
         self.train_loader = DataLoader(
             train_dataset, self.opt.batch_size, True,
-            num_workers=self.opt.num_workers, pin_memory=True, drop_last=True,
-            worker_init_fn=seed_worker)
+            num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
+            #num_workers=self.opt.num_workers, pin_memory=True, drop_last=True,
+            #worker_init_fn=seed_worker)
         val_dataset = self.dataset(
             self.opt.data_path, val_filenames, self.opt.height, self.opt.width,
             frames_to_load, 4, is_train=False, img_ext=img_ext)
@@ -242,14 +243,17 @@ class Trainer:
     def set_train(self):
         """Convert all models to training mode
         """
-        for k, m in self.models.items():
-            if self.train_teacher_and_pose:
+        for m in self.models.values():
                 m.train()
-            else:
-                # if teacher + pose is frozen, then only use training batch norm stats for
-                # multi components
-                if k in ['depth', 'encoder']:
-                    m.train()
+                
+        # for k, m in self.models.items():
+        #     if self.train_teacher_and_pose:
+        #         m.train()
+        #     else:
+        #         # if teacher + pose is frozen, then only use training batch norm stats for
+        #         # multi components
+        #         if k in ['depth', 'encoder']:
+        #             m.train()
 
     def set_eval(self):
         """Convert all models to testing/evaluation mode
@@ -281,17 +285,17 @@ class Trainer:
             self.parameters_to_train = []
             self.parameters_to_train += list(self.models["encoder"].parameters())
             self.parameters_to_train += list(self.models["depth"].parameters())
-            #self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
+#            self.model_optimizer = optim.Adam(self.parameters_to_train, self.opt.learning_rate)
             self.model_optimizer = optim.AdamW(self.parameters_to_train, self.opt.learning_rate)
             # self.model_lr_scheduler = optim.lr_scheduler.StepLR(
             #     self.model_optimizer, self.opt.scheduler_step_size, self.opt.scheduler_step_ratio)
             self.model_lr_scheduler = optim.lr_scheduler.StepLR(
                 self.model_optimizer, self.opt.scheduler_step_freeze_after_size, self.opt.scheduler_step_freeze_after_ratio)
 
-            # set eval so that teacher + pose batch norm is running average
-            self.set_eval()
-            # set train so that multi batch norm is in train mode
-            self.set_train()
+            # # set eval so that teacher + pose batch norm is running average
+            # self.set_eval()
+            # # set train so that multi batch norm is in train mode
+            # self.set_train()
 
 
     def run_epoch(self):
