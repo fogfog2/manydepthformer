@@ -294,25 +294,35 @@ class CMTBlock(t.nn.Module):
 
         # 3. IRFFN
         self.irffn = IRFFN(in_channels = in_channels, R = R)\
-            
+        
         # 3-1. MLP
-        # self.norm_layer=t.nn.LayerNorm(in_channels)
-        # mlp_hidden_dim = in_channels * 4
-        # act_layer = t.nn.GELU
-        # self.mlp = Mlp(in_features=in_channels, hidden_features=mlp_hidden_dim, act_layer=act_layer)
+        #self.use_mlp=False
+        self.use_mlp=True
+        if self.use_mlp:            
+            self.norm_layer=t.nn.LayerNorm(in_channels)
+            mlp_hidden_dim = in_channels * 4
+            act_layer = t.nn.GELU
+            self.mlp = Mlp(in_features=in_channels, hidden_features=mlp_hidden_dim, act_layer=act_layer)
 
     def forward(self, x):
 
         x = self.lpu(x)
-        x_ = self.lmhsa(x)
-        x = self.irffn(x) #mem = 11366
-        
-        
-        # B, C, H, W  = x.shape #mem = 11216
-        # x = x_.permute(0, 3, 2, 1).contiguous()
-        # x = x.view(B, W*H, C)
-        # x = self.mlp(self.norm_layer(x))
-        # x = x.view(B, W, H, C)
-        # x = x.permute(0, 3, 2, 1).contiguous()
+        x = self.lmhsa(x)
+        x_ = x
 
-        return x + x_
+        if not self.use_mlp:
+            x = self.irffn(x) #mem = 11366       
+        else:
+            B, C, H, W  = x.shape #mem = 11216
+            x = x_.permute(0, 3, 2, 1).contiguous()
+            x = x.view(B, W*H, C)
+            x = self.mlp(self.norm_layer(x))
+            x = x.view(B, W, H, C)
+            x = x.permute(0, 3, 2, 1).contiguous()
+            
+
+        return x +x_
+
+
+        
+
