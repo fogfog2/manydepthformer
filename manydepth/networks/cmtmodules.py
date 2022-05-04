@@ -297,7 +297,7 @@ class CMTBlock(t.nn.Module):
         
         # 3-1. MLP
         #self.use_mlp=False
-        self.use_mlp=True
+        self.use_mlp=False
         if self.use_mlp:            
             self.norm_layer=t.nn.LayerNorm(in_channels)
             mlp_hidden_dim = in_channels * 4
@@ -312,6 +312,7 @@ class CMTBlock(t.nn.Module):
 
         if not self.use_mlp:
             x = self.irffn(x) #mem = 11366       
+            return x
         else:
             B, C, H, W  = x.shape #mem = 11216
             x = x_.permute(0, 3, 2, 1).contiguous()
@@ -319,9 +320,7 @@ class CMTBlock(t.nn.Module):
             x = self.mlp(self.norm_layer(x))
             x = x.view(B, W, H, C)
             x = x.permute(0, 3, 2, 1).contiguous()
-            
-
-        return x +x_
+            return x +x_
 
 
         
