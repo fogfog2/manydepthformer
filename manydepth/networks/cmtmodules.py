@@ -295,11 +295,11 @@ class CMTBlock(t.nn.Module):
         # 3. IRFFN
         self.irffn = IRFFN(in_channels = in_channels, R = R)\
             
-        # 3-1. MPL
-        self.norm_layer=t.nn.LayerNorm(in_channels)
-        mlp_hidden_dim = in_channels * 4
-        act_layer = t.nn.GELU
-        self.mlp = Mlp(in_features=in_channels, hidden_features=mlp_hidden_dim, act_layer=act_layer)
+        # 3-1. MLP
+        # self.norm_layer=t.nn.LayerNorm(in_channels)
+        # mlp_hidden_dim = in_channels * 4
+        # act_layer = t.nn.GELU
+        # self.mlp = Mlp(in_features=in_channels, hidden_features=mlp_hidden_dim, act_layer=act_layer)
 
     def forward(self, x):
 

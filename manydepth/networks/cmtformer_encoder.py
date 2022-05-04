@@ -122,17 +122,24 @@ class CMTEncoderMatching(nn.Module):
         self.layer1 = nn.Sequential(encoder.maxpool,  encoder.layer1)
 
 
-        self.layer2 = encoder.layer2
-        self.layer3 = encoder.layer3
-        self.layer4 = encoder.layer4
+        if self.cmt_start_layer>2:
+            self.layer2 = encoder.layer2
+        
+        if self.cmt_start_layer>3:
+            self.layer3 = encoder.layer3
+            self.layer4 = encoder.layer4
         
 
         self.stem_channel = 64
         self.embed_dim= embed_dim    
         
         
-        self.cmt_feature = CMT_Feature(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv)        
-        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv or self.use_cmt_feature)
+        repeats= [2,2,2,2]
+        if self.use_cmt_feature:
+            self.cmt_feature = CMT_Feature(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv,repeats=repeats)        
+        
+        
+        self.cmt = CMT_Layer(input_width = input_width, input_height= input_height, embed_dim= self.embed_dim, start_layer=self.cmt_start_layer, use_upconv =self.use_upconv or self.use_cmt_feature, repeats=repeats)
 
         # self.stem_channel = 64
         # self.embed_dim= 52    
@@ -186,16 +193,22 @@ class CMTEncoderMatching(nn.Module):
                                               nn.ReLU(inplace=True)
                                               )
 
-        self.reduce_conv = nn.Sequential(nn.Conv2d(self.num_ch_enc[1] + self.num_depth_bins,
+        
+
+        if self.use_cmt_feature:
+            self.reduce_conv_cmt_feature= nn.Sequential(nn.Conv2d(embed_dim + self.num_depth_bins,
+                                                    out_channels=embed_dim,
+                                                    kernel_size=3, stride=1, padding=1),
+                                         nn.ReLU(inplace=True)
+                                         )  
+        else:
+            self.reduce_conv = nn.Sequential(nn.Conv2d(self.num_ch_enc[1] + self.num_depth_bins,
                                                    out_channels=self.num_ch_enc[1],
                                                    kernel_size=3, stride=1, padding=1),
                                          nn.ReLU(inplace=True)
                                          )
-        self.reduce_conv_cmt_feature= nn.Sequential(nn.Conv2d(embed_dim + self.num_depth_bins,
-                                                   out_channels=embed_dim,
-                                                   kernel_size=3, stride=1, padding=1),
-                                         nn.ReLU(inplace=True)
-                                         )
+                                            
+                                        
 
     def compute_depth_bins(self, min_depth_bin, max_depth_bin):
         """Compute the depths bins used to build the cost volume. Bins will depend upon
@@ -496,13 +509,18 @@ class ResnetEncoderCMT(nn.Module):
 
         self.layer0 = nn.Sequential(self.encoder.conv1,  self.encoder.bn1, self.encoder.relu)
         self.layer1 = nn.Sequential(self.encoder.maxpool,  self.encoder.layer1)
-        self.layer2 = self.encoder.layer2
-        self.layer3 = self.encoder.layer3
+        if self.cmt_start_layer>2:    
+            self.layer2 = self.encoder.layer2
+        if self.cmt_start_layer>3:                
+            self.layer3 = self.encoder.layer3
 
         self.res_ch_enc = np.array([64, 64, 128, 256, 512])
         self.upconv = fcconv(self.res_ch_enc[1],self.embed_dim)
-        self.upconv2 = fcconv(self.res_ch_enc[2],self.embed_dim*2)
-        self.upconv3 = fcconv(self.res_ch_enc[3],self.embed_dim*4)
+
+        if self.cmt_start_layer>2:    
+            self.upconv2 = fcconv(self.res_ch_enc[2],self.embed_dim*2)
+        if self.cmt_start_layer>3:    
+            self.upconv3 = fcconv(self.res_ch_enc[3],self.embed_dim*4)
 
         # if num_layers > 34:
         #     self.num_ch_enc = np.array([64, 256, self.embed_dim*2, self.embed_dim*4, self.embed_dim*8])

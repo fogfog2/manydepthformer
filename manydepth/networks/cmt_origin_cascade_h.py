@@ -210,7 +210,7 @@ class CMT(t.nn.Module):
 class CMT_Feature(t.nn.Module):
     """Define CMT-Ti model"""
 
-    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2, use_upconv = True):
+    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2, use_upconv = True, repeats = [2, 2, 2, 2]):
         """
         Args :
             --in_channels: default is 3
@@ -223,7 +223,7 @@ class CMT_Feature(t.nn.Module):
                           cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           R = 3.6,
-                          repeats = [2, 2, 2, 2],
+                          repeats = repeats,
                           input_width = input_width,
                           input_height = input_height)
 
@@ -366,39 +366,42 @@ class CMT_Layer_Select(t.nn.Module):
                 elif start_layer==4:
                     self.pa4 = PatchAggregation(in_channels = 1024, out_channels = pa_channelses[3])
 
-        cmt2 = []
-        for _ in range(repeats[1]):
-            cmt_layer = CMTBlock(input_width = widths[1],
-                                 input_height = heights[1],
-                                 kernel_size = 4,
-                                 d_k = cmt_channelses[1] // 2,
-                                 d_v = cmt_channelses[1] // 2,
-                                 num_heads = 2,
-                                 R = R, in_channels = pa_channelses[1])
-            cmt2.append(cmt_layer)
-        self.cmt2 = t.nn.Sequential(*cmt2)
 
-        cmt3 = []
-        for _ in range(repeats[2]):
-            cmt_layer = CMTBlock(input_width = widths[2],
-                                 input_height = heights[2],
-                                 kernel_size = 2,
-                                 d_k = cmt_channelses[2] // 4,
-                                 d_v = cmt_channelses[2] // 4,
-                                 num_heads = 4,
-                                 R = R, in_channels = pa_channelses[2])
-            cmt3.append(cmt_layer)
-        self.cmt3 = t.nn.Sequential(*cmt3)
+        if start_layer<3:
+            cmt2 = []        
+            for _ in range(repeats[1]):
+                cmt_layer = CMTBlock(input_width = widths[1],
+                                    input_height = heights[1],
+                                    kernel_size = 4,
+                                    d_k = cmt_channelses[1] // 2,
+                                    d_v = cmt_channelses[1] // 2,
+                                    num_heads = 2,
+                                    R = R, in_channels = pa_channelses[1])
+                cmt2.append(cmt_layer)
+            self.cmt2 = t.nn.Sequential(*cmt2)
+
+        if start_layer <4:
+            cmt3 = []
+            for _ in range(repeats[2]):
+                cmt_layer = CMTBlock(input_width = widths[2],
+                                    input_height = heights[2],
+                                    kernel_size = 2,
+                                    d_k = cmt_channelses[2] // 4,
+                                    d_v = cmt_channelses[2] // 4,
+                                    num_heads = 4,
+                                    R = R, in_channels = pa_channelses[2])
+                cmt3.append(cmt_layer)
+            self.cmt3 = t.nn.Sequential(*cmt3)
 
         cmt4 = []
         for _ in range(repeats[3]):
             cmt_layer = CMTBlock(input_width = widths[3],
-                                 input_height = heights[3],
-                                 kernel_size = 1,
-                                 d_k = cmt_channelses[3] // 8,
-                                 d_v = cmt_channelses[3] // 8,
-                                 num_heads = 8,
-                                 R = R, in_channels = pa_channelses[3])
+                                input_height = heights[3],
+                                kernel_size = 1,
+                                d_k = cmt_channelses[3] // 8,
+                                d_v = cmt_channelses[3] // 8,
+                                num_heads = 8,
+                                R = R, in_channels = pa_channelses[3])
             cmt4.append(cmt_layer)
         self.cmt4 = t.nn.Sequential(*cmt4)
 
@@ -467,7 +470,7 @@ class CMT_Layer_Select(t.nn.Module):
 class CMT_Layer(t.nn.Module):
     """Define CMT-Ti model"""
 
-    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2, use_upconv = True, num_layer = 18):
+    def __init__(self, input_width = 640, input_height = 192, embed_dim = 46, start_layer= 2, use_upconv = True, num_layer = 18, repeats = [2,2,2,2]):
         """
         Args :
             --in_channels: default is 3
@@ -480,7 +483,7 @@ class CMT_Layer(t.nn.Module):
                           cmt_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           pa_channelses = [embed_dim, embed_dim *2 , embed_dim*4, embed_dim * 8],
                           R = 3.6,
-                          repeats = [2, 2, 2 , 2],
+                          repeats = repeats,
                           input_width = input_width,
                           input_height = input_height,
                           start_layer=start_layer,
