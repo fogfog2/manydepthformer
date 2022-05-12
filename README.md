@@ -4,7 +4,18 @@ Reference Code
 
 - https://github.com/nianticlabs/manydepth
     
-   
+## Overview
+
+Hybrid Encoder-Decoder 
+
+![structure](https://github.com/fogfog2/manydepthformer/blob/master/assets/manydepthformer_graphical_abstract.png)
+
+
+Strcuture
+
+![detailed_structure](https://github.com/fogfog2/manydepthformer/blob/master/assets/manydepthformer_structure.png)
+
+
 ## Pretrained weights and evaluation
 
 You can download weights for some pretrained models here
