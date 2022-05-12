@@ -52,11 +52,11 @@ VSCode Launch (train, evalute, test)
 
 
 
-  [Manydepthformer_KITTI(640x192)]: <https://drive.google.com/drive/folders/1wIvP0uVmxIJBeGKr-7s09qITFAtxT0tI?usp=sharing>
-  [Manydepthformer_KITTI_T50(640x192)]: <https://drive.google.com/drive/folders/1C2JTB01F_b0HqajTRmj59CnJsdv4FHOI?usp=sharing>
-  [Manydepthformer_Cityscapes(640x192)]: <https://drive.google.com/drive/folders/1eXevxF_doANjD_cnQWgzNqJWpWfr0f9G?usp=sharing> 
+  [Manydepthformer_KITTI(640x192)]: <https://drive.google.com/file/d/1f3cX6-ZhlOK-wQG-uZjqujUkUgJgL4-3/view?usp=sharing>
+  [Manydepthformer_KITTI_T50(640x192)]: <https://drive.google.com/file/d/1C0aEe1mO4ChQgE9r7TadSYMkbZ32dhKB/view?usp=sharing>
+  [Manydepthformer_Cityscapes(640x192)]: <https://drive.google.com/file/d/1DmqjemWvSN6Fc-SjmVBKFNDdp7giwWUW/view?usp=sharing> 
   [Manydepthformer Ablation Encoder(640x192)]: <https://drive.google.com/drive/folders/1rmH9e9l1Pd6o3q5Iq3AXUELRljfQi1YJ?usp=sharing>
-  [Manydepthformer Ablation Decoder(640x192)]: <https://drive.google.com/drive/folders/1xdiwXmAtD6wpO09L8GKwuCspQesH9uf5?usp=sharing>
+  [Manydepthformer Ablation Decoder(640x192)]: <https://drive.google.com/file/d/1AX8LN-qD5EAfrWUsrkPWWo0qVeCfbwUY/view?usp=sharing>
   
   [script_table2_eval.sh]: <https://github.com/fogfog2/manydepthformer/blob/master/script_table2_eval.sh>
   [script_table3_eval.sh]: <https://github.com/fogfog2/manydepthformer/blob/master/script_table3_eval.sh>
