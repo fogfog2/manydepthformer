@@ -11,7 +11,7 @@ Hybrid Encoder-Decoder
 ![structure](https://github.com/fogfog2/manydepthformer/blob/master/assets/manydepthformer_graphical_abstract.png)
 
 
-Strcuture
+Structure
 
 ![detailed_structure](https://github.com/fogfog2/manydepthformer/blob/master/assets/manydepthformer_structure.png)
 
