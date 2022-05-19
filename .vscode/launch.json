@@ -37,6 +37,19 @@
                 // "--attention_only_channel",
                 //"--swin_use_feature",
                 "--png"]
+
+
+            // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
+            // "args": ["--data_path=/home/sj/kitti", 
+            //     //"--load_weights_folder=/media/sj/data/manydepth/kitti_cmt_attention_noupconv/mdp/models/weights_19",
+            //     "--load_weights_folder=/media/sj/data2/manydepth_paper/t2_our_full",
+            //     "--eval_mono",
+            //     //"--cmt_use_upconv",
+            //     "--cmt_layer=3",
+            //     "--cmt_dim=46",
+            //     "--train_model=cmt",
+            //     "--use_attention_decoder",
+            //     "--png"]
             // "program": "${workspaceFolder}/manydepth/train.py",
             // "args": ["--data_path=/home/sj/kitti",
             //     "--log_dir=/home/sj/manydepth/kitti_cmt_ori_t18_2",                

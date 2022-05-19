@@ -421,9 +421,26 @@ def evaluate(opt):
         else:
             mask = gt_depth > 0
 
+        # cmask = np.uint8(crop_mask * 255)
+        # save_path = os.path.join("/home/sj/gt_depth/", "{:010d}_m.png".format(i))
+        # cv2.imwrite(save_path, cmask)
+
+        # depth = np.clip(gt_depth, 0, 80)        
+        # depth = np.uint8(depth * 3)
+        # save_path = os.path.join("/home/sj/gt_depth/", "{:010d}.png".format(i))
+        # cv2.imwrite(save_path, depth)
+        
+        # depth2 = np.uint8(pred_depth*100)
+        # save_path = os.path.join("/home/sj/gt_depth/", "{:010d}_p.png".format(i))
+        # cv2.imwrite(save_path, depth2)
+
+
         pred_depth = pred_depth[mask]
         gt_depth = gt_depth[mask]
 
+
+        #disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
+        
         pred_depth *= opt.pred_depth_scale_factor
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
@@ -432,6 +449,8 @@ def evaluate(opt):
 
         pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
         pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
+
+        #pred_depth_img = cv2.resize(pred_depth, (1242,375))
 
         errors.append(compute_errors(gt_depth, pred_depth))
 
