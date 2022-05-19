@@ -40,6 +40,13 @@ class MonodepthOptions:
                                  help="number of resnet layers",
                                  default=18,
                                  choices=[18, 34, 50, 101, 152])
+        self.parser.add_argument("--train_model",
+                                 type=str,
+                                 help="which model",
+                                 choices=["resnet", "cmt", "swin"],
+                                 default="resnet")
+                
+                
         self.parser.add_argument("--depth_binning",
                                  help="defines how the depth bins are constructed for the cost"
                                       "volume. 'linear' is uniformly sampled in depth space,"
@@ -89,7 +96,35 @@ class MonodepthOptions:
                                  type=int,
                                  help="frames to load",
                                  default=[0, -1, 1])
+        #decoder option
+        self.parser.add_argument("--use_attention_decoder",
+                                 help="if set, cmt use upconv)",
+                                 action="store_true")        
+        #cmt options
+        self.parser.add_argument("--cmt_use_upconv",
+                                 help="if set, cmt use upconv)",
+                                 action="store_true")
+        self.parser.add_argument("--cmt_layer",
+                                 type=int,
+                                 help="start cmt layer",
+                                 default=2)
+        self.parser.add_argument("--cmt_dim",
+                                 type=int,
+                                 help="start cmt layer",
+                                 default=46)
+        
+        self.parser.add_argument("--cmt_use_feature",
+                                 help="start cmt layer",
+                                 action="store_true")
 
+        self.parser.add_argument("--attention_only_channel",
+                                 help="attetnion channel",
+                                 action="store_true")
+        
+        #swin option
+        self.parser.add_argument("--swin_use_feature",
+                                 help="start swin layer",
+                                 action="store_true")
         # OPTIMIZATION options
         self.parser.add_argument("--batch_size",
                                  type=int,
@@ -98,7 +133,7 @@ class MonodepthOptions:
         self.parser.add_argument("--learning_rate",
                                  type=float,
                                  help="learning rate",
-                                 default=6e-5)
+                                 default=2e-4)
         self.parser.add_argument("--num_epochs",
                                  type=int,
                                  help="number of epochs",
@@ -107,6 +142,19 @@ class MonodepthOptions:
                                  type=int,
                                  help="step size of the scheduler",
                                  default=5)
+        self.parser.add_argument("--scheduler_step_ratio",
+                                 type=float,
+                                 help="step ratio of the scheduler",
+                                 default=0.1)
+
+        self.parser.add_argument("--scheduler_step_freeze_after_size",
+                                 type=int,
+                                 help="step size of the scheduler",
+                                 default=5)
+        self.parser.add_argument("--scheduler_step_freeze_after_ratio",
+                                 type=float,
+                                 help="step ratio of the scheduler",
+                                 default=0.1)        
         self.parser.add_argument("--freeze_teacher_and_pose",
                                  action="store_true",
                                  help="If set, freeze the weights of the single frame teacher"

@@ -1,7 +1,6 @@
 *.pyc
 .vscode/settings.json
 .vscode/launch.json
-*.txt
 *.npy
 /result
 *.npy

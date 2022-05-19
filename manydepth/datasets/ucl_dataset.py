@@ -16,11 +16,11 @@ from manydepth.kitti_utils import generate_depth_map
 from .mono_dataset import MonoDataset
 
 
-class CustomDataset(MonoDataset):
+class CustomUCLDataset(MonoDataset):
     """Superclass for different types of KITTI dataset loaders
     """
     def __init__(self, *args, **kwargs):
-        super(CustomDataset, self).__init__(*args, **kwargs)
+        super(CustomUCLDataset, self).__init__(*args, **kwargs)
 
         # NOTE: Make sure your intrinsics matrix is *normalized* by the original image size
         self.K = np.array([[0.34, 0, 0.5, 0],
@@ -71,11 +71,11 @@ class CustomDataset(MonoDataset):
         return color
 
 
-class CustomRAWDataset(CustomDataset):
+class CustomUCLRAWDataset(CustomUCLDataset):
     """KITTI dataset which loads the original velodyne depth maps for ground truth
     """
     def __init__(self, *args, **kwargs):
-        super(CustomRAWDataset, self).__init__(*args, **kwargs)
+        super(CustomUCLRAWDataset, self).__init__(*args, **kwargs)
 
     def get_image_path(self, folder, frame_index, side):
 

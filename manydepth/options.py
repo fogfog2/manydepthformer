@@ -33,7 +33,7 @@ class MonodepthOptions:
                                  type=str,
                                  help="which training split to use",
                                  choices=["eigen_zhou", "eigen_full", "odom", "benchmark",
-                                          "cityscapes_preprocessed","custom"],
+                                          "cityscapes_preprocessed","custom_ucl"],
                                  default="eigen_zhou")
         self.parser.add_argument("--num_layers",
                                  type=int,
@@ -62,7 +62,7 @@ class MonodepthOptions:
                                  help="dataset to train on",
                                  default="kitti",
                                  choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test",
-                                          "cityscapes_preprocessed", "custom"])
+                                          "cityscapes_preprocessed", "custom_ucl"])
         self.parser.add_argument("--png",
                                  help="if set, trains from raw KITTI png files (instead of jpgs)",
                                  action="store_true")
@@ -267,7 +267,7 @@ class MonodepthOptions:
                                  type=str,
                                  default="eigen",
                                  choices=["eigen", "eigen_benchmark", "benchmark", "odom_9",
-                                          "odom_10", "cityscapes", "custom"],
+                                          "odom_10", "cityscapes", "custom_ucl"],
                                  help="which split to run eval on")
         self.parser.add_argument("--save_pred_disps",
                                  help="if set saves predicted disparities",
