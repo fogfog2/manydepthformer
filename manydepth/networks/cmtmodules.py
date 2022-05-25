@@ -293,7 +293,7 @@ class CMTBlock(t.nn.Module):
                            in_channels = in_channels)
 
         # 3. IRFFN
-        self.irffn = IRFFN(in_channels = in_channels, R = R)\
+        self.irffn = IRFFN(in_channels = in_channels, R = R)
         
         # 3-1. MLP
         #self.use_mlp=False
