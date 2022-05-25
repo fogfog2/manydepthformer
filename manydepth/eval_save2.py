@@ -80,7 +80,7 @@ import tqdm
 
         # Setup dataloaders
         
-        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
+        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files2.txt"))
         #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
         #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
         #filenames = readlines("/home/sj/colon_syn/test_files.txt")
@@ -182,6 +182,8 @@ import tqdm
                                 num_depth_bins=opt.num_depth_bins,
                                 upconv = opt.cmt_use_upconv, start_layer = opt.cmt_layer, embed_dim = opt.cmt_dim,  use_cmt_feature = opt.cmt_use_feature
                                 )
+
+
             pose_enc_dict = torch.load(os.path.join(opt.load_weights_folder, "pose_encoder.pth"))
             pose_dec_dict = torch.load(os.path.join(opt.load_weights_folder, "pose.pth"))
 

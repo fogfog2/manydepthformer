@@ -4,3 +4,4 @@
 *.npy
 /result
 *.npy
+/image*

@@ -6,10 +6,14 @@ import cv2
 from manydepth.layers import disp_to_depth, BackprojectDepth
 import torch
 
-dir_base = "result/colon2/image_cmt"
+dir_base = "/home/sj/result2/city_sequence/image_cmt"
 intrinsic_dir = dir_base+"_intrinsic"
 pose_dir = dir_base+"_pose"
 rgb_dir = dir_base+"_rgb"
+
+
+WIDTH  = 512
+HEIGHT = 192
 
 depth_list = sorted(os.listdir(dir_base))
 intrinsic_list = sorted(os.listdir(intrinsic_dir))
@@ -19,8 +23,9 @@ rgb_list = sorted(os.listdir(rgb_dir))
 pcd = o3d.geometry.PointCloud()
 vis = o3d.visualization.VisualizerWithKeyCallback()
 counter = 0
-WIDTH  = 256
-HEIGHT = 256
+
+
+
 backproject_depth = BackprojectDepth(1, HEIGHT, WIDTH)
 
 
@@ -94,7 +99,7 @@ def inference():
 
 
     temp_pcd = o3d.geometry.PointCloud()
-    if len(depth_list)-1 < counter:                
+    if len(depth_list) < counter:                
         counter = 0
 
     d_image, rgb_image, intrinsic_array, intrinsic_k_array, pose_array = loader(counter)
@@ -103,6 +108,7 @@ def inference():
 
     #depth 
     np_pred_depth = cv2.resize(d_image, (WIDTH, HEIGHT))
+    check_depth= cv2.resize(d_image, (WIDTH, HEIGHT))
     
     kernel = np.ones((5,5), np.float32) / 25
     np_pred_depth = cv2.filter2D(np_pred_depth ,-1, kernel)
@@ -127,10 +133,23 @@ def inference():
     #pose = torch.reshape(pose, (1,4,4))
 
     #rgb
+    minv = check_depth.min()
+    maxv = check_depth.max()
+    check_depth = ((check_depth - minv)/ (maxv-minv) )*255
+    check_depth = check_depth.astype(np.uint8)
+    im_color = cv2.applyColorMap(check_depth, cv2.COLORMAP_JET)
+
     rgb_image = cv2.resize(rgb_image, (WIDTH, HEIGHT))
+    
     colored = rgb_image.reshape(rgb_image.shape[0]*rgb_image.shape[1],3)
     colored = np.float64(colored)
     colored = colored[...,::-1]/255.0
+    # colored = im_color.reshape(im_color.shape[0]*im_color.shape[1],3)
+    # colored = np.float64(colored)
+    # colored = colored[...,::-1]/255.0
+
+    
+    
 
     #show pcd point
     #if SHOW_UNPROJECTED_DEPTH:  
@@ -162,19 +181,16 @@ def inference():
     mask2 = streamarray[:,2]<0.5
     
     mask_a = mask & mask2
-    streamarray = streamarray[mask_a]
+    #streamarray = streamarray[mask_a]
     
-    colored=colored[mask_a]
+   # colored=colored[mask_a]
     
     # mask = streamarray[:,0]<0.5
     # streamarray = streamarray[mask]
     # colored=colored[mask]
     
     # global acc_colored
-    # global acc_point
-    
-
-    
+    # global acc_poin
     
     # pcd.colors = o3d.utility.Vector3dVector(np_acc_col)
     # pcd.points = o3d.utility.Vector3dVector(np_acc_point)
@@ -182,7 +198,7 @@ def inference():
     # current frame transform
     temp_pcd.colors = o3d.utility.Vector3dVector(colored)
     temp_pcd.points = o3d.utility.Vector3dVector(streamarray)
-    T, xyzs = update_pose(T, np_pose)
+    #T, xyzs = update_pose(T, np_pose)
     temp_pcd.transform(T)
     fov_set.transform(T)
     
@@ -190,28 +206,28 @@ def inference():
     np_current_points =np.asarray(temp_pcd.points)
     np_current_colors = np.asarray(temp_pcd.colors)
     
-    acc_point.append(np_current_points)     
-    acc_colored.append(np_current_colors)
+    # acc_point.append(np_current_points)     
+    # acc_colored.append(np_current_colors)
     
-    np_acc_col = np.concatenate(acc_colored)
-    np_acc_point = np.concatenate(acc_point)
+    # np_acc_col = np.concatenate(acc_colored)
+    # np_acc_point = np.concatenate(acc_point)
     
-    pcd.colors = o3d.utility.Vector3dVector(np_acc_col)
-    pcd.points = o3d.utility.Vector3dVector(np_acc_point)
+    # pcd.colors = o3d.utility.Vector3dVector(np_acc_col)
+    # pcd.points = o3d.utility.Vector3dVector(np_acc_point)
     
-    #pcd.colors = o3d.utility.Vector3dVector(np_current_colors)
-    #pcd.points = o3d.utility.Vector3dVector(np_current_points)
+    pcd.colors = o3d.utility.Vector3dVector(np_current_colors)
+    pcd.points = o3d.utility.Vector3dVector(np_current_points)
     
     #if counter%5 ==0:
     #    vis.add_geometry(pcd)   
     vis.update_geometry(pcd)   
-    vis.update_geometry(fov_set)
+    #vis.update_geometry(fov_set)
     counter = counter+1
 
 
 def animation_callback(vis):  
     global counter
-    if len(depth_list)-1 > counter:         
+    if len(depth_list) > counter:         
         inference()
 
 
@@ -227,7 +243,7 @@ fov_set.transform(T)
 #axis 
 axis_pt = np.array([ [0, 0, 0], [0,2,0] , [2,0,0], [0,0,2]], dtype=np.float32)
 
-axis_lines = [[0,1],[0,2],[0,3]] 
+axis_lines = [[0,1],[0,2]] 
 
 axis_line_set = o3d.geometry.LineSet(
     points=o3d.utility.Vector3dVector(axis_pt),
@@ -241,9 +257,9 @@ if __name__ == "__main__":
     vis.create_window()    
     vis.add_geometry(pcd)    
     vis.add_geometry(axis_line_set)    
-    vis.add_geometry(fov_set)
+   # vis.add_geometry(fov_set)
     
-    #vis.register_key_callback(65,animation_callback)
-    vis.register_animation_callback(animation_callback)
+    vis.register_key_callback(65,animation_callback)
+    #vis.register_animation_callback(animation_callback)
     vis.run()
 
