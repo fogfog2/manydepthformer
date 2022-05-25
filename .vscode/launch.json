@@ -21,19 +21,19 @@
             //]
             
             //KITTI Train            
-            "program": "${workspaceFolder}/manydepth/train.py",
-            "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/manydepth/kitti_cmt_attention22",                
-                "--batch_size=8",
-                "--height=192",
-                "--width=640",
-                "--num_epochs=40",
-                "--freeze_teacher_epoch=15",
-                "--scheduler_step_size=5",
-                "--cmt_layer=3",
-                "--train_model=cmt",
-                "--use_attention_decoder",
-                "--png"]
+            // "program": "${workspaceFolder}/manydepth/train.py",
+            // "args": ["--data_path=/home/sj/kitti",
+            //     "--log_dir=/home/sj/manydepth/kitti_cmt_attention22",                
+            //     "--batch_size=8",
+            //     "--height=192",
+            //     "--width=640",
+            //     "--num_epochs=40",
+            //     "--freeze_teacher_epoch=15",
+            //     "--scheduler_step_size=5",
+            //     "--cmt_layer=3",
+            //     "--train_model=cmt",
+            //     "--use_attention_decoder",
+            //     "--png"]
 
             //KITTI Eval
             // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
@@ -89,24 +89,24 @@
 
 
             //UCL Colonoscope dataset Train Resnet
-            // "program": "${workspaceFolder}/manydepth/train.py",
-            // "args": ["--data_path=/home/sj/colon",
-            //     "--log_dir=/home/sj/src/manydepth/colon_resnet",
+            "program": "${workspaceFolder}/manydepth/train.py",
+            "args": ["--data_path=/home/sj/colon",
+                "--log_dir=/home/sj/src/manydepth/colon_resnet",
 
-            //     "--dataset=custom_ucl",
-            //     "--split=custom_ucl",
+                "--dataset=custom_ucl",
+                "--split=custom_ucl",
                 
-            //     "--batch_size=8",
-            //     "--height=256",
-            //     "--width=256",
-            //     "--num_epochs=40",
-            //     "--freeze_teacher_epoch=15",
-            //     "--scheduler_step_size=5",
+                "--batch_size=8",
+                "--height=256",
+                "--width=256",
+                "--num_epochs=40",
+                "--freeze_teacher_epoch=15",
+                "--scheduler_step_size=5",
     
-            //     "--train_model=resnet",
-            //     // "--cmt_layer=3",
-            //     // "--use_attention_decoder",
-            //     "--png"]
+                "--train_model=resnet",
+                // "--cmt_layer=3",
+                // "--use_attention_decoder",
+                "--png"]
 
             //Custom Colonoscope datset Train
             // "program": "${workspaceFolder}/manydepth/train_custom.py",
@@ -223,10 +223,10 @@
             //     "--train_model=cmt",
             //     "--png"]
 
-            //kitti save
+           // kitti save
             // "program": "${workspaceFolder}/manydepth/eval_save2.py",
             // "args": ["--data_path=/home/sj/kitti",
-            //     "--load_weights_folder=/media/sj/data2/manydepth/pc1/kitti_resnet_raw/mdp/models/weights_19",
+            //     "--load_weights_folder=/home/sj/manydepth/kitti_cmt_raw/mdp/models/weights_19",
                 
             //     "--height=192",
             //     "--width=640",

@@ -13,7 +13,7 @@ import numpy as np
 import PIL.Image as pil
 
 from manydepth.kitti_utils import generate_depth_map
-from .mono_dataset import MonoDataset
+from .mono_dataset_custom import MonoDataset
 
 
 class CustomUCLDataset(MonoDataset):
@@ -47,21 +47,16 @@ class CustomUCLDataset(MonoDataset):
     def index_to_folder_and_frame_idx(self, index):
         """Convert index in the dataset to a folder name, frame_idx and any other bits
         """
-        line = self.filenames[index].split()
-        folder = line[0]
-
-        if len(line) == 3:
-            frame_index = int(line[1])
-        else:
-            frame_index = 0
-
-        if len(line) == 3:
-            side = line[2]
-        else:
-            side = None
-
-        return folder, frame_index, side
-
+        line = self.filenames[index].split()        
+        
+        tt = os.path.basename(line[0])
+        base, ext = os.path.splitext(tt)
+        if ext == '.png':
+            frame_index = int(base[-4:])
+        folder = os.path.dirname(line[0])
+        
+        return folder, frame_index
+    
     def get_color(self, folder, frame_index, side, do_flip):
         color = self.loader(self.get_image_path(folder, frame_index, side))
 
@@ -80,11 +75,11 @@ class CustomUCLRAWDataset(CustomUCLDataset):
     def get_image_path(self, folder, frame_index, side):
 
         image_path = os.path.join(self.data_path, folder)
-        base, ext = os.path.splitext(os.path.basename(folder))
-        f_idx = int(base[-4:])+frame_index
-
+        #base, ext = os.path.splitext(os.path.basename(folder))
+        #f_idx = int(base[-4:])+frame_index
+        path = os.path.join(image_path, "FrameBuffer_"+str(frame_index).zfill(4)+".png")
         #new
-        path = os.path.join(self.data_path, folder)
+        #path = os.path.join(self.data_path, folder)
         
         #synthetic
         #path = os.path.join(self.data_path,  os.path.dirname(folder), str(f_idx).zfill(4) + ext)
