@@ -132,7 +132,12 @@ def evaluate(opt):
                                                      frames_to_load, 4,
                                                      is_train=False,
                                                      img_ext=img_ext)
-
+        elif opt.eval_split =='custom_ucl':
+            dataset = datasets.CustomUCLRAWDataset(opt.data_path, filenames,
+                                                     HEIGHT, WIDTH,
+                                                     frames_to_load, 4,
+                                                     is_train=False,
+                                                     img_ext=img_ext)
         else:
             dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                                encoder_dict['height'], encoder_dict['width'],
@@ -363,10 +368,34 @@ def evaluate(opt):
 
         print("-> No ground truth is available for the KITTI benchmark, so not evaluating. Done.")
         quit()
+    # elif opt.eval_split =='custom_ucl':
+    #     save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
+    #     print("-> Saving out benchmark predictions to {}".format(save_dir))
+    #     if not os.path.exists(save_dir):
+    #         os.makedirs(save_dir)
+
+    #     for idx in range(len(pred_disps)):
+    #         disp_resized = cv2.resize(pred_disps[idx], (256, 256))
+    #         depth = 1 / disp_resized
+    #         depth = np.clip(depth, 0, 255)
+    #         depth = np.uint8(depth * 150)
+    #         save_path = os.path.join(save_dir, "{:010d}.png".format(idx))
+    #         # cv2.imwrite(save_path, depth)
+    #         # cv2.imshow("test", depth)
+    #         # cv2.waitKey(1)
 
     if opt.eval_split == 'cityscapes':
         print('loading cityscapes gt depths individually due to their combined size!')
         gt_depths = os.path.join(splits_dir, opt.eval_split, "gt_depths")
+        
+    elif opt.eval_split=='custom_ucl':
+        gt_path = filenames
+        gt_depths = []
+        for v in gt_path:
+            gt_depths.append(v.replace("FrameBuffer","Depth"))
+        
+        #gt_depths = np.load(gt_path, fix_imports=True, encoding='latin1', allow_pickle=True)["data"]        
+        
     else:
         gt_path = os.path.join(splits_dir, opt.eval_split, "gt_depths.npz")
         gt_depths = np.load(gt_path, fix_imports=True, encoding='latin1', allow_pickle=True)["data"]
@@ -392,7 +421,12 @@ def evaluate(opt):
             # images
             gt_height = int(round(gt_height * 0.75))
             gt_depth = gt_depth[:gt_height]
-
+        elif opt.eval_split =='custom_ucl':
+            
+            path = os.path.join("/home/sj/colon",gt_depths[i])
+            gt_depth =  cv2.imread(path,0)
+            gt_height, gt_width = gt_depth.shape[:2]
+            
         else:
             gt_depth = gt_depths[i]
             gt_height, gt_width = gt_depth.shape[:2]
