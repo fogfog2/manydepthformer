@@ -23,8 +23,8 @@ class CustomUCLDataset(MonoDataset):
         super(CustomUCLDataset, self).__init__(*args, **kwargs)
 
         # NOTE: Make sure your intrinsics matrix is *normalized* by the original image size
-        self.K = np.array([[0.34, 0, 0.5, 0],
-                           [0, 0.35, 0.5, 0],
+        self.K = np.array([[0.3468, 0, 0.4992, 0],
+                           [0, 0.3544, 0.4978, 0],
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)
 

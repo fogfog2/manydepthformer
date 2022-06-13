@@ -80,7 +80,7 @@ import tqdm
 
         # Setup dataloaders
         
-        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files2.txt"))
+        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files+.txt"))
         #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
         #filenames = readlines(os.path.join(splits_dir, "odom/test_files_09.txt"))
         #filenames = readlines("/home/sj/colon_syn/test_files.txt")
@@ -124,18 +124,20 @@ import tqdm
                                                      frames_to_load, 4,
                                                      is_train=False,
                                                      img_ext=img_ext)
+        elif opt.eval_split =='custom_ucl':          
+            dataset = datasets.CustomUCLRAWDataset(opt.data_path, filenames,
+                                               encoder_dict['height'], encoder_dict['width'],
+                                               frames_to_load, 4,
+                                               is_train=False,
+                                               img_ext=img_ext)
 
         else:
-            # dataset = datasets.CustomRAWDataset(opt.data_path, filenames,
-            #                                    encoder_dict['height'], encoder_dict['width'],
-            #                                    frames_to_load, 4,
-            #                                    is_train=False,
-            #                                    img_ext=img_ext)
             dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                                encoder_dict['height'], encoder_dict['width'],
                                                frames_to_load, 4,
                                                is_train=False,
                                                img_ext=img_ext)
+ 
             
             # dataset = datasets.KITTIOdomDataset(opt.data_path, filenames,
             #                                    encoder_dict['height'], encoder_dict['width'],
@@ -336,7 +338,7 @@ import tqdm
     
     
     for idx in range(len(pred_disps)):
-        disp_resized = cv2.resize(pred_disps[idx], (640, 192))        
+        disp_resized = cv2.resize(pred_disps[idx], (256, 256))        
         depth = np.clip(disp_resized, 0, 10)
         dmax, dmin = depth.max(), depth.min()
         size = dmax-dmin

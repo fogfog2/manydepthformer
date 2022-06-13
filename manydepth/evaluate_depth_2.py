@@ -93,7 +93,7 @@ def evaluate(opt):
         print("-> Loading weights from {}".format(opt.load_weights_folder))
 
         # Setup dataloaders
-        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
+        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files2.txt"))
        # filenames = filenames[::2]
         if opt.eval_teacher:
             encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
@@ -453,7 +453,8 @@ def evaluate(opt):
             mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
         else:
-            mask = gt_depth > 0
+            mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
+           # mask = gt_depth > 0
 
         # cmask = np.uint8(crop_mask * 255)
         # save_path = os.path.join("/home/sj/gt_depth/", "{:010d}_m.png".format(i))
