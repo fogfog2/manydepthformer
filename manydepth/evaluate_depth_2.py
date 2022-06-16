@@ -93,7 +93,7 @@ def evaluate(opt):
         print("-> Loading weights from {}".format(opt.load_weights_folder))
 
         # Setup dataloaders
-        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files2.txt"))
+        filenames = readlines(os.path.join(splits_dir, opt.eval_split, "test_files.txt"))
        # filenames = filenames[::2]
         if opt.eval_teacher:
             encoder_path = os.path.join(opt.load_weights_folder, "mono_encoder.pth")
@@ -411,6 +411,10 @@ def evaluate(opt):
         print("   Mono evaluation - using median scaling")
 
     errors = []
+    error_1 = []
+    error_2 = []
+    error_3 = []
+    error_4 = []
     ratios = []
     for i in tqdm.tqdm(range(pred_disps.shape[0])):
 
@@ -487,6 +491,33 @@ def evaluate(opt):
 
         #pred_depth_img = cv2.resize(pred_depth, (1242,375))
 
+        mask1 = gt_depth<20
+        mask2 = np.logical_and(gt_depth>=20, gt_depth <40)
+        mask3 = np.logical_and(gt_depth>=40, gt_depth <60)
+        mask4 = np.logical_and(gt_depth>=60, gt_depth <80)
+        
+        
+        gt_depth_1 = gt_depth[mask1]
+        gt_depth_2 = gt_depth[mask2]
+        gt_depth_3 = gt_depth[mask3]
+        gt_depth_4 = gt_depth[mask4]
+        
+        pred_depth_1 = pred_depth[mask1]
+        pred_depth_2 = pred_depth[mask2]
+        pred_depth_3 = pred_depth[mask3]
+        pred_depth_4 = pred_depth[mask4]
+        
+        
+        
+        error_1.append(compute_errors(gt_depth_1, pred_depth_1))
+        if len(pred_depth_2) !=0:
+            error_2.append(compute_errors(gt_depth_2, pred_depth_2))
+        
+        if len(pred_depth_3) !=0:
+            error_3.append(compute_errors(gt_depth_3, pred_depth_3))
+        if len(pred_depth_4) !=0:
+            error_4.append(compute_errors(gt_depth_4, pred_depth_4))
+        
         errors.append(compute_errors(gt_depth, pred_depth))
 
     if opt.save_pred_disps:
@@ -505,10 +536,20 @@ def evaluate(opt):
         print(" Scaling ratios | med: {:0.3f} | std: {:0.3f}".format(med, np.std(ratios / med)))
 
     mean_errors = np.array(errors).mean(0)
+    
+    mean_errors_1 = np.array(error_1).mean(0)
+    mean_errors_2 = np.array(error_2).mean(0)
+    mean_errors_3 = np.array(error_3).mean(0)
+    mean_errors_4 = np.array(error_4).mean(0)
 
     print("\n  " + ("{:>8} | " * 7).format("abs_rel",
                                            "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
+    
     print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
+    print(("&{: 8.3f}  " * 7).format(*mean_errors_1.tolist()) + "\\\\")
+    print(("&{: 8.3f}  " * 7).format(*mean_errors_2.tolist()) + "\\\\")
+    print(("&{: 8.3f}  " * 7).format(*mean_errors_3.tolist()) + "\\\\")
+    print(("&{: 8.3f}  " * 7).format(*mean_errors_4.tolist()) + "\\\\")
     print("\n-> Done!")
 
 

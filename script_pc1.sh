@@ -2,8 +2,8 @@ export PYTHONPATH="${PYTHONPATH}:/home/sj/src/manydepthformer"
 
 
 #kitti
-# DATA_PATH=/home/sj/kitti
-# WEIGHT_PATH=/home/sj/manydepth/kitti_cmt_ori_t18_2
+DATA_PATH=/home/sj/kitti
+WEIGHT_PATH=/home/sj/manydepth/kitti_resnet_raw
 
 
 #citi
@@ -12,8 +12,8 @@ export PYTHONPATH="${PYTHONPATH}:/home/sj/src/manydepthformer"
 #WEIGHT_PATH=/media/sj/data/manydepth/pc2/city_resnet_s2_r01_56k_r1_adam_s2r01
 
 #ucl
-DATA_PATH=/home/sj/colon
-WEIGHT_PATH=/home/sj/src/manydepth/colon_resnet
+#DATA_PATH=/home/sj/colon
+#WEIGHT_PATH=/home/sj/src/manydepth/colon_resnet
 
 
 
@@ -22,11 +22,11 @@ WEIGHT_PATH=/home/sj/src/manydepth/colon_resnet
 #SET=(20 39)
 #for i in ${SET[@]}
 
-SET=$(seq 20 39)
+SET=$(seq 20 34)
 for i in $SET
 do 
 #kitti
- python manydepth/evaluate_depth_2.py --data_path=$DATA_PATH --load_weights_folder=$WEIGHT_PATH/mdp/models/weights_$i --eval_split=custom_ucl --eval_mono --train_model=resnet --png
+ python manydepth/evaluate_depth_2.py --data_path=$DATA_PATH --load_weights_folder=$WEIGHT_PATH/mdp/models/weights_$i --eval_mono --train_model=resnet --png
  #python manydepth/evaluate_depth_2.py --data_path=$DATA_PATH --load_weights_folder=$WEIGHT_PATH/mdp/models/weights_$i --eval_mono --train_model=resnet --png
 #city
  #python manydepth/evaluate_depth_2.py --data_path=$DATA_PATH --load_weights_folder=$WEIGHT_PATH/mdp/models/weights_$i --eval_split=cityscapes --eval_mono --train_model=resnet --png
