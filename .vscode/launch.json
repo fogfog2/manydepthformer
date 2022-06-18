@@ -36,19 +36,19 @@
             //     "--png"]
 
             //KITTI Eval
-            "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
-            "args": ["--data_path=/home/sj/kitti", 
-                //"--load_weights_folder=/media/sj/data/manydepth/kitti_cmt_attention_noupconv/mdp/models/weights_19",
-                //"--load_weights_folder=/media/sj/data/manydepth/pc1/kitti_cmt_attention_22/mdp/models/weights_37",
-                //"--load_weights_folder=/media/sj/data/manydepth/pc1/KITTI_MR",
-                "--load_weights_folder=/media/sj/data/manydepth/pc3/kitti_cmt_attention_22_t50",
-                "--eval_mono",
-                //"--cmt_use_upconv",
-                "--cmt_layer=3",
-                "--cmt_dim=46",
-                "--train_model=cmt",
-                "--use_attention_decoder",
-                "--png"]
+            // "program": "${workspaceFolder}/manydepth/evaluate_depth_2.py",
+            // "args": ["--data_path=/home/sj/kitti", 
+            //     //"--load_weights_folder=/media/sj/data/manydepth/kitti_cmt_attention_noupconv/mdp/models/weights_19",
+            //     //"--load_weights_folder=/media/sj/data/manydepth/pc1/kitti_cmt_attention_22/mdp/models/weights_37",
+            //     //"--load_weights_folder=/media/sj/data/manydepth/pc1/KITTI_MR",
+            //     "--load_weights_folder=/media/sj/data/manydepth/pc3/kitti_cmt_attention_22_t50",
+            //     "--eval_mono",
+            //     //"--cmt_use_upconv",
+            //     "--cmt_layer=3",
+            //     "--cmt_dim=46",
+            //     "--train_model=cmt",
+            //     "--use_attention_decoder",
+            //     "--png"]
 
             //KITTI Train odometry
             // "program": "${workspaceFolder}/manydepth/train.py",
@@ -68,19 +68,19 @@
             //     "--png"]
 
             //KITTI Eval pose
-            // "program": "${workspaceFolder}/manydepth/evaluate_pose.py",
-            // "args": ["--data_path=/home/sj/kitti", 
-            //     //"--load_weights_folder=/media/sj/data/manydepth/kitti_cmt_attention_noupconv/mdp/models/weights_19",
-            //     "--load_weights_folder=/media/sj/data/manydepth/pc1/kitti_cmt_attention_22/mdp/models/weights_37",
-            //     //"--load_weights_folder=/media/sj/data/manydepth/pc1/KITTI_MR",
-            //     "--eval_mono",
-            //     "--eval_split=odom_10",
-            //     //"--cmt_use_upconv",
-            //     "--cmt_layer=3",
-            //     "--cmt_dim=46",
-            //     "--train_model=cmt",
-            //     "--use_attention_decoder",
-            //     "--png"]
+            "program": "${workspaceFolder}/manydepth/evaluate_pose.py",
+            "args": ["--data_path=/home/sj/kitti", 
+                //"--load_weights_folder=/media/sj/data/manydepth/kitti_cmt_attention_noupconv/mdp/models/weights_19",
+                "--load_weights_folder=/media/sj/data/manydepth/pc1/kitti_cmt_attention_22/mdp/models/weights_37",
+                //"--load_weights_folder=/media/sj/data/manydepth/pc1/KITTI_MR",
+                "--eval_mono",
+                "--eval_split=odom_9",
+                //"--cmt_use_upconv",
+                "--cmt_layer=3",
+                "--cmt_dim=46",
+                "--train_model=cmt",
+                "--use_attention_decoder",
+                "--png"]
 
             //CITYSCAPES Train
             // "program": "${workspaceFolder}/manydepth/train.py",

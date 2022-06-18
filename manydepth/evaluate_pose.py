@@ -305,8 +305,9 @@ def evaluate(opt):
     gt_global_poses = np.concatenate(
         (gt_global_poses, np.zeros((gt_global_poses.shape[0], 1, 4))), 1)
     gt_global_poses[:, 3, 3] = 1
-    gt_xyzs = gt_global_poses[30:, :3, 3]
-    gt_global_poses = gt_global_poses[30:]
+    gt_xyzs = gt_global_poses[:, :3, 3]
+    #gt_xyzs = gt_global_poses[30:, :3, 3]
+    #gt_global_poses = gt_global_poses[30:]
     gt_local_poses = []
     for i in range(1, len(gt_global_poses)):
         gt_local_poses.append(
@@ -328,8 +329,19 @@ def evaluate(opt):
 
     all_pred= np.array(dump_xyz(pred_poses[0:num_frames - 1]))
     all_gts= np.array(dump_xyz(gt_local_poses[0:num_frames- 1]))
-    pd.DataFrame(all_pred).to_csv("pred_10_r.csv")
-    pd.DataFrame(all_gts).to_csv("gt_10_r.csv")
+    
+    offset = all_gts[0] - all_pred[0]
+    pred_xyz = all_pred + offset[None, :]
+
+    # Optimize the scaling factor
+    
+    scale = np.sum(all_gts * pred_xyz) / np.sum(pred_xyz ** 2)
+    
+    pred_result = pred_xyz * scale 
+    all_result = all_gts
+    
+    pd.DataFrame(pred_result).to_csv("pred_9_s.csv")
+    pd.DataFrame(all_result).to_csv("gt_9_s.csv")
     
     save_path = os.path.join(opt.load_weights_folder, "poses.npy")
     np.save(save_path, pred_poses)
