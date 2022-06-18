@@ -554,7 +554,7 @@ def evaluate(opt):
     print("\n  " + ("{:>8} | " * 7).format("abs_rel",
                                            "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
     
-    # print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
+    print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
     # print(("&{: 8.3f}  " * 7).format(*mean_errors_1.tolist()) + "\\\\")
     # print(("&{: 8.3f}  " * 7).format(*mean_errors_2.tolist()) + "\\\\")
     # print(("&{: 8.3f}  " * 7).format(*mean_errors_3.tolist()) + "\\\\")

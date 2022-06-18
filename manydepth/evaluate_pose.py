@@ -324,6 +324,7 @@ def evaluate(opt):
 
         ates.append(compute_ate(gt_local_xyzs, local_xyzs))
         #all_pred.append(local_xyzs)
+        
     print("\n   Trajectory error: {:0.3f}, std: {:0.3f}\n".format(np.mean(ates), np.std(ates)))
 
 
@@ -340,8 +341,9 @@ def evaluate(opt):
     pred_result = pred_xyz * scale 
     all_result = all_gts
     
-    pd.DataFrame(pred_result).to_csv("pred_9_s.csv")
-    pd.DataFrame(all_result).to_csv("gt_9_s.csv")
+    pd.DataFrame(ates).to_csv("pred_10_rmse.csv")
+    pd.DataFrame(pred_result).to_csv("pred_10_s.csv")
+    #pd.DataFrame(all_result).to_csv("gt_10_s.csv")
     
     save_path = os.path.join(opt.load_weights_folder, "poses.npy")
     np.save(save_path, pred_poses)
