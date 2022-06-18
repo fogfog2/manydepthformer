@@ -416,6 +416,11 @@ def evaluate(opt):
     error_3 = []
     error_4 = []
     ratios = []
+    
+    counter_1 =0
+    counter_2 =0
+    counter_3 =0
+    counter_4 =0
     for i in tqdm.tqdm(range(pred_disps.shape[0])):
 
         if opt.eval_split == 'cityscapes':
@@ -507,7 +512,10 @@ def evaluate(opt):
         pred_depth_3 = pred_depth[mask3]
         pred_depth_4 = pred_depth[mask4]
         
-        
+        counter_1 +=len(pred_depth_1)
+        counter_2 +=len(pred_depth_2)
+        counter_3 +=len(pred_depth_3)
+        counter_4 +=len(pred_depth_4)
         
         error_1.append(compute_errors(gt_depth_1, pred_depth_1))
         if len(pred_depth_2) !=0:
@@ -541,15 +549,16 @@ def evaluate(opt):
     mean_errors_2 = np.array(error_2).mean(0)
     mean_errors_3 = np.array(error_3).mean(0)
     mean_errors_4 = np.array(error_4).mean(0)
-
+    
+   # print(counter_1, counter_2,counter_3,counter_4)
     print("\n  " + ("{:>8} | " * 7).format("abs_rel",
                                            "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
     
-    print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
-    print(("&{: 8.3f}  " * 7).format(*mean_errors_1.tolist()) + "\\\\")
-    print(("&{: 8.3f}  " * 7).format(*mean_errors_2.tolist()) + "\\\\")
-    print(("&{: 8.3f}  " * 7).format(*mean_errors_3.tolist()) + "\\\\")
-    print(("&{: 8.3f}  " * 7).format(*mean_errors_4.tolist()) + "\\\\")
+    # print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
+    # print(("&{: 8.3f}  " * 7).format(*mean_errors_1.tolist()) + "\\\\")
+    # print(("&{: 8.3f}  " * 7).format(*mean_errors_2.tolist()) + "\\\\")
+    # print(("&{: 8.3f}  " * 7).format(*mean_errors_3.tolist()) + "\\\\")
+    # print(("&{: 8.3f}  " * 7).format(*mean_errors_4.tolist()) + "\\\\")
     print("\n-> Done!")
 
 
