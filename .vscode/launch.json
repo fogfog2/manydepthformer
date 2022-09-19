@@ -23,7 +23,7 @@
            // KITTI Train            
             "program": "${workspaceFolder}/manydepth/train.py",
             "args": ["--data_path=/home/sj/kitti",
-                "--log_dir=/home/sj/manydepth/kitti_cmt_s5_lr2e3",                
+                "--log_dir=/home/sj/manydepth/kitti_cmt_attention_22_mw",                
                 "--batch_size=8",
                 "--height=192",
                 "--width=640",
@@ -31,7 +31,7 @@
 
                 "--freeze_teacher_epoch=15",
                 
-                "--learning_rate=2e-3",
+                "--learning_rate=2e-4",
                 "--scheduler_step_size=5",
                 "--scheduler_step_ratio=0.1",
 
