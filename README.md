@@ -6,6 +6,11 @@ Reference Code
     
 ## Overview
 
+Paper
+Self-Supervised Monocular Depth Estimation Using Hybrid Transformer Encoder
+
+- https://ieeexplore.ieee.org/document/9864127
+
 Hybrid Encoder-Decoder 
 
 ![structure](https://github.com/fogfog2/manydepthformer/blob/master/assets/manydepthformer_graphical_abstract.png)
