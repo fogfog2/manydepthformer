@@ -6,7 +6,8 @@ Reference Code
     
 ## Overview
 
-Paper
+Paper:
+
 Self-Supervised Monocular Depth Estimation Using Hybrid Transformer Encoder
 
 - https://ieeexplore.ieee.org/document/9864127
